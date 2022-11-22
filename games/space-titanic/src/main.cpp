@@ -27,6 +27,7 @@
 #include "common_variable_8x16_sprite_font.h"
 
 // My assets
+#include "bn_sprite_items_chari.h"
 #include "bn_sprite_items_ninja.h"
 #include "bn_sprite_items_world.h"
 
@@ -136,7 +137,7 @@ int gameplay() {
     }
 
     // Create player
-    bn::sprite_ptr player = bn::sprite_items::ninja.create_sprite(start_x, start_y, 1);
+    bn::sprite_ptr player = bn::sprite_items::chari.create_sprite(start_x, start_y, 1);
 
     while(!bn::keypad::start_pressed())
     {
