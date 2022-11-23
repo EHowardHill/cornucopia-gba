@@ -344,7 +344,7 @@ int gameplay()
                 spiral.set_position(player.x(), player.y());
                 if (spiral.rotation_angle().integer() % 65 == 0) {
                     BN_LOG(trig_offset);
-                    bn::sound_items::shepard.play(0.2);
+                    bn::sound_items::shepard.play(0.1);
                 }
                 break;
             }
