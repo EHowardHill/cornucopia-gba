@@ -21,9 +21,11 @@
 #include "bn_display.h"
 #include "bn_blending.h"
 #include "bn_bg_palettes.h"
+#include "bn_bg_palette_ptr.h"
 #include "bn_regular_bg_ptr.h"
 #include "bn_sprite_text_generator.h"
 #include "bn_sprite_animate_actions.h"
+#include "bn_sprite_palette_ptr.h"
 #include "common_info.h"
 #include "common_variable_8x16_sprite_font.h"
 
@@ -52,6 +54,11 @@
 #define D_RIGHT 2
 #define D_UP 3
 #define D_DOWN 4
+
+const bn::sprite_palette_item palette_brown = bn::sprite_items::world.palette_item();
+const bn::sprite_palette_item palette_blue = bn::sprite_items::projectiles.palette_item();
+
+const bn::bg_palette_item palette_bg_carpet = bn::regular_bg_items::bg_carpet.palette_item();
 
 // Custom classes
 class Barrel
@@ -160,8 +167,11 @@ void chari_sound(int chari, int sound)
     }
 }
 
+//
+
 // Big fat global variables
 int current_level = 0;
+int chari_offset = 0 * 13;
 bn::sprite_text_generator text_generator(common::variable_8x16_sprite_font);
 
 int gameplay()
@@ -171,16 +181,15 @@ int gameplay()
     bn::memcpy(my_level, resolve_level(current_level), sizeof(my_level));
 
     // Variable init
-    int start_x = encode_x(7);
+    int start_x = encode_x(8);
     int start_y = encode_y(7);
     int pros_x = start_x;
     int pros_y = start_y;
     bool gravity = false;
     int freefall = 0;
-    int rotate = 0;
+    int rotate = 90;
     int dead = 0;
     int orientation = 0;
-    int chari_offset = 0 * 13;
     int notice = 0;
     int window_y = 120;
     int indicate = 0;
@@ -194,8 +203,10 @@ int gameplay()
     bn::vector<bn::sprite_ptr, 64> sprites_v;
     bn::vector<Barrel, 4> sprites_b;
     bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
-    bn::regular_bg_ptr bg_carpet = bn::regular_bg_items::bg_carpet.create_bg(0, 0);
     bn::vector<bn::sprite_ptr, 32> text_sprites;
+
+    // Background stuff
+    bn::regular_bg_ptr bg_carpet = bn::regular_bg_items::bg_carpet.create_bg(0, 0);
 
     // Entrance / exit window
     bn::rect_window external_window = bn::rect_window::external();
@@ -206,21 +217,18 @@ int gameplay()
     // Create wall tiles
     for (int i = 0; i < 135; i++)
     {
-        if (my_level[i] == 1)
-        {
-            bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), my_level[i] - 1);
-            sprites_v.push_back(n);
-        }
-        else if (my_level[i] == 2)
+        if (my_level[i] == 2)
         {
             bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), my_level[i] - 1);
             n.put_below();
             sprites_v.push_back(n);
-        }
-        else if (my_level[i] == 3)
-        {
+        } else if (my_level[i] == 3) {
             sprites_b.push_back(Barrel(resolve_x(i), resolve_y(i), my_level));
-            sprites_b.at(sprites_b.size() - 1).sprite.put_above();
+        }
+        else if (my_level[i] > 0)
+        {
+            bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), my_level[i] - 1);
+            sprites_v.push_back(n);
         }
     }
 
@@ -230,11 +238,11 @@ int gameplay()
     spiral.set_visible(false);
 
     // Aim
-    bn::sprite_ptr aim = bn::sprite_items::projectiles.create_sprite(0,0,7);
+    bn::sprite_ptr aim = bn::sprite_items::projectiles.create_sprite(0, 0, 7);
     aim.set_visible(false);
 
     // Bullet
-    bn::sprite_ptr bullet = bn::sprite_items::projectiles.create_sprite(0,0,2);
+    bn::sprite_ptr bullet = bn::sprite_items::projectiles.create_sprite(0, 0, 2);
     bn::sprite_animate_action<2> bullet_action = bn::create_sprite_animate_action_forever(
         bullet, 1, bn::sprite_items::projectiles.tiles_item(), 2, 3);
     bullet.set_visible(false);
@@ -250,6 +258,10 @@ int gameplay()
     {
         spiral.set_visible(false);
         aim.set_visible(false);
+
+        if (gravity) {
+            rotate = 0;
+        }
 
         // Handle window
         if (window_y > -80)
@@ -277,22 +289,30 @@ int gameplay()
             }
         }
 
-        if (bullet.visible()) {
-            if (chari_offset == 0) {
+        if (bullet.visible())
+        {
+            if (chari_offset == 0)
+            {
                 bn::fixed proj_x = bn::degrees_cos(bullet.rotation_angle()) * 4;
                 bn::fixed proj_y = -bn::degrees_sin(bullet.rotation_angle()) * 4;
                 int spot = decode((bullet.x() + (proj_x)).integer(), (bullet.y() + (proj_y)).integer());
 
-                if (my_level[spot] > 0) {
+                if (my_level[spot] == 1 || my_level[spot] > 2)
+                {
 
-                    if (bn::abs(decode(bullet.x().integer(), bullet.y().integer()) - spot) <= 2) {
+                    if (bn::abs(decode(bullet.x().integer(), bullet.y().integer()) - spot) <= 2)
+                    {
                         bullet.set_rotation_angle((540 - bullet.rotation_angle().integer()) % 360);
                         bullet_count++;
-                        if (bullet_count <= 8) bn::sound_items::pew.play();
-                    } else {
+                        if (bullet_count <= 8)
+                            bn::sound_items::pew.play();
+                    }
+                    else
+                    {
                         bullet.set_rotation_angle((360 - bullet.rotation_angle().integer()) % 360);
                         bullet_count++;
-                        if (bullet_count <= 8) bn::sound_items::pew.play();
+                        if (bullet_count <= 8)
+                            bn::sound_items::pew.play();
                     }
 
                     proj_x = bn::degrees_cos(bullet.rotation_angle()) * 4;
@@ -301,29 +321,43 @@ int gameplay()
 
                 bullet.set_position(
                     bullet.x() + proj_x,
-                    bullet.y() + proj_y
-                );
+                    bullet.y() + proj_y);
 
-                if (bullet_count > 8) {
+                if (bullet_count > 8)
+                {
                     bn::sound_items::pew_die.play();
                     bullet.set_visible(false);
                 }
-            } else if (chari_offset == 13) {
+            }
+            else if (chari_offset == 13)
+            {
+                int spot = decode(bullet.x().integer(), bullet.y().integer());
+                if (my_level[spot] > 0)
+                {
+                    bn::sound_items::pew_die.play();
+                    bullet.set_visible(false);
+                    indicate = 0;
+                }
+
                 bullet.set_rotation_angle((bullet.rotation_angle().integer() + 1) % 360);
 
-                if (bn::keypad::left_held()) {
+                if (bn::keypad::left_held())
+                {
                     bullet_x -= bn::fixed(0.02);
                 }
 
-                if (bn::keypad::right_held()) {
+                if (bn::keypad::right_held())
+                {
                     bullet_x += bn::fixed(0.02);
                 }
 
-                if (bn::keypad::up_held()) {
+                if (bn::keypad::up_held())
+                {
                     bullet_y -= bn::fixed(0.02);
                 }
 
-                if (bn::keypad::down_held()) {
+                if (bn::keypad::down_held())
+                {
                     bullet_y += bn::fixed(0.02);
                 }
 
@@ -336,13 +370,18 @@ int gameplay()
         {
             switch (chari_offset)
             {
+            case 26:
+            {
+                break;
+            }
             case 13:
             {
                 spiral.set_visible(true);
                 spiral.set_rotation_angle((spiral.rotation_angle().integer() + 10) % 360);
                 spiral.set_scale((bn::sin(trig_offset) * bn::fixed(0.5)) + bn::fixed(1.5), (bn::cos(trig_offset) * bn::fixed(0.5)) + bn::fixed(1.5));
                 spiral.set_position(player.x(), player.y());
-                if (spiral.rotation_angle().integer() % 65 == 0) {
+                if (spiral.rotation_angle().integer() % 65 == 0)
+                {
                     BN_LOG(trig_offset);
                     bn::sound_items::shepard.play(0.1);
                 }
@@ -351,12 +390,22 @@ int gameplay()
             default:
             {
                 aim.set_visible(true);
-                if (bn::keypad::up_held() || bn::keypad::left_held()) {
+                if (bn::keypad::up_held() || bn::keypad::left_held())
+                {
                     trig_offset = (trig_offset + 4) % 360;
-                } else if (bn::keypad::down_held() || bn::keypad::right_held()) {
-                    trig_offset = (trig_offset - 4) % 360;
+                    if (trig_offset % 12 == 0) {
+                        bn::sound_items::click.play(0.3);
+                    }
                 }
-                if (trig_offset < 0) trig_offset = 360;
+                else if (bn::keypad::down_held() || bn::keypad::right_held())
+                {
+                    trig_offset = (trig_offset - 4) % 360;
+                    if (trig_offset % 12 == 0) {
+                        bn::sound_items::click.play(0.3);
+                    }
+                }
+                if (trig_offset < 0)
+                    trig_offset = 360;
                 aim.set_position(pros_x + (bn::degrees_sin(trig_offset) * bn::fixed(16)).integer(), pros_y + (bn::degrees_cos(trig_offset) * bn::fixed(16)).integer());
                 aim.set_rotation_angle((trig_offset + 90) % 360);
                 break;
@@ -443,9 +492,19 @@ int gameplay()
         {
 
             // Swap characters
-            if (bn::keypad::l_pressed() || bn::keypad::r_pressed()) {
+            if (bn::keypad::l_pressed() || bn::keypad::r_pressed())
+            {
                 indicate = 0;
                 chari_offset = (chari_offset + 13) % 39;
+                bullet.set_visible(false);
+                for (int i = 0; i < sprites_v.size(); i++)
+                {
+                    bn::sprite_palette_ptr palette = sprites_v.at(i).palette();
+                    palette.set_colors(palette_brown);
+                }
+                bn::bg_palette_ptr bg_palette = bg_carpet.palette();
+                bg_palette.set_inverted(false);
+                bn::sound_items::click.play();
             }
 
             // If on black hole
@@ -464,19 +523,34 @@ int gameplay()
                 if (indicate == 0)
                 {
                     // Activate thingy
-                    if (bn::keypad::b_pressed()) {
+                    if (bn::keypad::b_pressed())
+                    {
                         indicate = 1;
-                        if (chari_offset == 0) {
+                        if (chari_offset == 0)
+                        {
                             bullet_action = bn::create_sprite_animate_action_forever(
                                 bullet, 1, bn::sprite_items::projectiles.tiles_item(), 2, 3);
                             bn::sound_items::push_luna.play(0.5);
                             bullet_count = 0;
-                        } else if (chari_offset == 13) {
+                        }
+                        else if (chari_offset == 13)
+                        {
                             bullet_action = bn::create_sprite_animate_action_forever(
                                 bullet, 1, bn::sprite_items::projectiles.tiles_item(), 0, 1);
                             bullet_count = 0;
                             bullet.set_visible(true);
                             bullet.set_position(pros_x, pros_y);
+                        }
+                        else if (chari_offset == 26)
+                        {
+                            for (int i = 0; i < sprites_v.size(); i++)
+                            {
+                                bn::sprite_palette_ptr palette = sprites_v.at(i).palette();
+                                palette.set_colors(palette_blue);
+                            }
+                            bn::bg_palette_ptr bg_palette = bg_carpet.palette();
+                            bg_palette.set_inverted(true);
+                            bn::sound_items::space_01.play();
                         }
                     }
 
@@ -489,34 +563,34 @@ int gameplay()
                         if (bn::keypad::left_held())
                         {
                             held_key = 1;
-                            if (my_level[decode(pros_x - 16, pros_y)] != 1)
+                            if (my_level[decode(pros_x - 16, pros_y)] != 1 && my_level[decode(pros_x - 16, pros_y)] < 3)
                             {
                                 pros_x -= 16;
                             }
                         }
 
-                        if (bn::keypad::right_held())
+                        else if (bn::keypad::right_held())
                         {
                             held_key = 2;
-                            if (my_level[decode(pros_x + 16, pros_y)] != 1)
+                            if (my_level[decode(pros_x + 16, pros_y)] != 1 && my_level[decode(pros_x + 16, pros_y)] < 3)
                             {
                                 pros_x += 16;
                             }
                         }
 
-                        if (bn::keypad::up_held())
+                        else if (bn::keypad::up_held())
                         {
                             held_key = 3;
-                            if (my_level[decode(pros_x, pros_y - 16)] != 1)
+                            if (my_level[decode(pros_x, pros_y - 16)] != 1 && my_level[decode(pros_x, pros_y - 16)] < 3)
                             {
                                 pros_y -= 16;
                             }
                         }
 
-                        if (bn::keypad::down_held())
+                        else if (bn::keypad::down_held())
                         {
                             held_key = 4;
-                            if (my_level[decode(pros_x, pros_y + 16)] != 1)
+                            if (my_level[decode(pros_x, pros_y + 16)] != 1 && my_level[decode(pros_x, pros_y + 16)] < 3)
                             {
                                 pros_y += 16;
                             }
@@ -564,14 +638,14 @@ int gameplay()
                         if (bn::keypad::left_held())
                         {
                             is_held = 1;
-                            if (my_level[decode(pros_x - 16, pros_y)] != 1)
+                            if (my_level[decode(pros_x - 16, pros_y)] != 1 && my_level[decode(pros_x - 16, pros_y)] < 3)
                             {
-                                if (my_level[decode(pros_x - 16, pros_y - 16)] == 1)
+                                if (my_level[decode(pros_x - 16, pros_y - 16)] == 1 || my_level[decode(pros_x - 16, pros_y - 16)] > 2)
                                 {
                                     rotate = 270;
                                     pros_x -= 16;
                                 }
-                                else if (my_level[decode(pros_x - 16, pros_y + 16)] == 1)
+                                else if (my_level[decode(pros_x - 16, pros_y + 16)] == 1 || my_level[decode(pros_x - 16, pros_y + 16)] > 2)
                                 {
                                     rotate = 90;
                                     pros_x -= 16;
@@ -588,14 +662,14 @@ int gameplay()
                         if (bn::keypad::right_held())
                         {
                             is_held = 2;
-                            if (my_level[decode(pros_x + 16, pros_y)] != 1)
+                            if (my_level[decode(pros_x + 16, pros_y)] != 1 && my_level[decode(pros_x + 16, pros_y)] < 3)
                             {
-                                if (my_level[decode(pros_x + 16, pros_y - 16)] == 1)
+                                if (my_level[decode(pros_x + 16, pros_y - 16)] == 1 || my_level[decode(pros_x + 16, pros_y - 16)] > 2)
                                 {
                                     rotate = 270;
                                     pros_x += 16;
                                 }
-                                else if (my_level[decode(pros_x + 16, pros_y + 16)] == 1)
+                                else if (my_level[decode(pros_x + 16, pros_y + 16)] == 1 || my_level[decode(pros_x + 16, pros_y + 16)] > 2)
                                 {
                                     rotate = 90;
                                     pros_x += 16;
@@ -612,14 +686,14 @@ int gameplay()
                         if (bn::keypad::up_held())
                         {
                             is_held = 3;
-                            if (my_level[decode(pros_x, pros_y - 16)] != 1)
+                            if (my_level[decode(pros_x, pros_y - 16)] != 1 && my_level[decode(pros_x, pros_y - 16)] < 3)
                             {
-                                if (my_level[decode(pros_x + 16, pros_y - 16)] == 1)
+                                if (my_level[decode(pros_x + 16, pros_y - 16)] == 1 || my_level[decode(pros_x + 16, pros_y - 16)] > 2)
                                 {
                                     pros_y -= 16;
                                     rotate = 180;
                                 }
-                                else if (my_level[decode(pros_x - 16, pros_y - 16)] == 1)
+                                else if (my_level[decode(pros_x - 16, pros_y - 16)] == 1 || my_level[decode(pros_x - 16, pros_y - 16)] > 2)
                                 {
                                     pros_y -= 16;
                                     rotate = 0;
@@ -636,14 +710,14 @@ int gameplay()
                         if (bn::keypad::down_held())
                         {
                             is_held = 4;
-                            if (my_level[decode(pros_x, pros_y + 16)] != 1)
+                            if (my_level[decode(pros_x, pros_y + 16)] != 1 && my_level[decode(pros_x, pros_y + 16)] < 3)
                             {
-                                if (my_level[decode(pros_x + 16, pros_y + 16)] == 1)
+                                if (my_level[decode(pros_x + 16, pros_y + 16)] == 1 || my_level[decode(pros_x + 16, pros_y + 16)] > 2)
                                 {
                                     pros_y += 16;
                                     rotate = 180;
                                 }
-                                else if (my_level[decode(pros_x - 16, pros_y + 16)] == 1)
+                                else if (my_level[decode(pros_x - 16, pros_y + 16)] == 1 || my_level[decode(pros_x - 16, pros_y + 16)] > 2)
                                 {
                                     pros_y += 16;
                                     rotate = 0;
@@ -740,34 +814,60 @@ int gameplay()
                             }
                         }
                     }
-                
-                } else if (indicate == 1) {
+                }
+                else if (indicate == 1)
+                {
                     // Activate thingy
-                    if (bn::keypad::b_pressed()) {
+                    if (bn::keypad::b_pressed())
+                    {
                         indicate = 0;
-                        if (chari_offset == 0) {
+                        if (chari_offset == 0)
+                        {
                             bullet.set_visible(true);
                             bullet.set_position(pros_x, pros_y);
                             bullet.set_rotation_angle((aim.rotation_angle().integer() + 180) % 360);
                             bn::sound_items::pew.play();
-                        } else if (chari_offset == 13) {
+                        }
+                        else if (chari_offset == 13)
+                        {
                             bullet.set_visible(false);
                             bullet.set_position(pros_x, pros_y);
                         }
+                        else if (chari_offset == 26)
+                        {
+                            for (int i = 0; i < sprites_v.size(); i++)
+                            {
+                                bn::sprite_palette_ptr palette = sprites_v.at(i).palette();
+                                palette.set_colors(palette_brown);
+                            }
+                            bn::bg_palette_ptr bg_palette = bg_carpet.palette();
+                            bg_palette.set_inverted(false);
+                            bn::sound_items::space_02.play();
+                        }
                     }
 
-                    switch (chari_offset) {
-                        case 13: {
-                            rotate = 0;
-                            action = bn::create_sprite_animate_action_forever(
-                                player, 4, bn::sprite_items::chari.tiles_item(), 47, 47, 47, 47);
-                            break;
-                        }
-                        default: {
-                            action = bn::create_sprite_animate_action_forever(
-                                player, 4, bn::sprite_items::chari.tiles_item(), 46, 46, 46, 46);
-                            break;
-                        }
+                    switch (chari_offset)
+                    {
+                    case 26:
+                    {
+                        action = bn::create_sprite_animate_action_forever(
+                            player, 4, bn::sprite_items::chari.tiles_item(), 45, 45, 45, 45);
+                        break;
+                        break;
+                    }
+                    case 13:
+                    {
+                        rotate = 0;
+                        action = bn::create_sprite_animate_action_forever(
+                            player, 4, bn::sprite_items::chari.tiles_item(), 47, 47, 47, 47);
+                        break;
+                    }
+                    default:
+                    {
+                        action = bn::create_sprite_animate_action_forever(
+                            player, 4, bn::sprite_items::chari.tiles_item(), 46, 46, 46, 46);
+                        break;
+                    }
                     }
                 }
             }
@@ -803,7 +903,7 @@ int gameplay()
                             player, 4, bn::sprite_items::chari.tiles_item(), 7 + chari_offset, 8 + chari_offset, 7 + chari_offset, 8 + chari_offset);
                     }
                     orientation = 1;
-                    player.set_horizontal_flip(false);
+                    player.set_horizontal_flip(gravity);
                 }
 
                 // Go right
