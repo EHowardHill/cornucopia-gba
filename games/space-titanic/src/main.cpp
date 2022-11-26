@@ -27,7 +27,7 @@
 #include "bn_sprite_animate_actions.h"
 #include "bn_sprite_palette_ptr.h"
 #include "common_info.h"
-#include "common_variable_8x16_sprite_font.h"
+#include "common_variable_8x8_sprite_font.h"
 
 // My assets
 #include "bn_sprite_items_chari.h"
@@ -65,7 +65,7 @@
 const bn::sprite_palette_item palette_brown = bn::sprite_items::world.palette_item();
 const bn::sprite_palette_item palette_blue = bn::sprite_items::projectiles.palette_item();
 const bn::bg_palette_item palette_bg_carpet = bn::regular_bg_items::bg_carpet.palette_item();
-const bn::sprite_text_generator text_generator(common::variable_8x16_sprite_font);
+const bn::sprite_text_generator text_generator(common::variable_8x8_sprite_font);
 
 // Big fat global variable
 struct global_data
@@ -204,6 +204,7 @@ int linear_gameplay()
     int window_y = 120;
     int trig_offset = 0;
     int bullet_count = 0;
+    int text_delay = 0;
 
     bn::fixed bullet_x;
     bn::fixed bullet_y;
@@ -352,6 +353,21 @@ int linear_gameplay()
         }
 
         // Is intro monologue happening?
+        if (text_sprites.size() > 0) {
+            for (int i = 0; i < text_sprites.size(); i++) {
+                if (text_sprites.at(i).y() < 72) {
+                    text_sprites.at(i).set_y(text_sprites.at(i).y() + 1);
+                }
+                if (text_delay < 16) {
+                    text_delay++;
+                } else if (!text_sprites.at(i).visible()) {
+                    text_sprites.at(i).set_visible(true);
+                    text_delay = 0;
+                    bn::sound_items::click.play(0.3);
+                    i = text_sprites.size();
+                }
+            }
+        }
         if (notice == 2)
         {
             if (button.x() < -7 * 16)
@@ -369,7 +385,12 @@ int linear_gameplay()
                 }
                 else
                 {
-                    text_generator.generate(-6 * 16, 72, &base_string[0], text_sprites);
+                    text_generator.generate(-6 * 16, 68, &base_string[0], text_sprites);
+                    for (int i = 0; i < text_sprites.size(); i++) {
+                        
+                        text_sprites.at(i).set_visible(false);
+                    }
+                    
                 }
             }
 
@@ -390,6 +411,9 @@ int linear_gameplay()
                 {
                     const char *base_string = (char *)resolve_dialogue(0);
                     text_generator.generate(-6 * 16, 72, &base_string[0], text_sprites);
+                    for (int i = 0; i < text_sprites.size(); i++) {
+                        text_sprites.at(i).set_visible(false);
+                    }
                 }
             }
             else if (notice == 0 && button.x() > -8 * 16)
