@@ -1,5 +1,6 @@
 const char d_messages[][32] = {
-    "Push wooden crate"};
+    "Push wooden crate",
+    "Break rotten crate"};
 
 const char d_intro_01[][32] = {
     "Testing? Testing? This is KAM,",

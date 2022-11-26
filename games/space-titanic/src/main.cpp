@@ -30,6 +30,7 @@
 #include "common_variable_8x8_sprite_font.h"
 
 // My assets
+#include "bn_sprite_items_cinemint.h"
 #include "bn_sprite_items_chari.h"
 #include "bn_sprite_items_ninja.h"
 #include "bn_sprite_items_world.h"
@@ -37,6 +38,7 @@
 #include "bn_sprite_items_buttons.h"
 #include "bn_sprite_items_projectiles.h"
 #include "bn_regular_bg_items_bg_carpet.h"
+#include "bn_regular_bg_items_bg_cinemint.h"
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
@@ -83,24 +85,56 @@ class Barrel
 
 public:
     bn::sprite_ptr sprite = bn::sprite_items::items.create_sprite(0, 0, 1);
+    int type = 0;
+    int state = 0;
     Room *current_room;
 
-    Barrel(int x, int y, Room *new_level)
+    Barrel(int x, int y, Room *new_level, int new_type = 0)
     {
-        sprite.set_x(x);
-        sprite.set_y(y);
         current_room = new_level;
         current_room->map[decode(x, y)] = 1;
+        type = new_type;
+
+        switch (type)
+        {
+        case 1:
+        {
+            sprite = bn::sprite_items::items.create_sprite(x, y, 2);
+            break;
+        }
+        default:
+        {
+            sprite.set_x(x);
+            sprite.set_y(y);
+            break;
+        }
+        }
     }
 
     // poosh
     void push(int x, int y)
     {
-        x_speed = x;
-        y_speed = y;
-        int *base_level = (int *)current_room->resolve_level;
-        current_room->map[decode(sprite.x().integer(), sprite.y().integer())] = base_level[decode(sprite.x().integer(), sprite.y().integer())];
-        steps = 0;
+        switch (type)
+        {
+        case 1:
+        {
+            bn::sound_items::crunch.play();
+            state = 1;
+            sprite = bn::sprite_items::items.create_sprite(sprite.x(), sprite.y(), 3);
+            sprite.put_below();
+            int *base_level = (int *)current_room->resolve_level;
+            current_room->map[decode(sprite.x().integer(), sprite.y().integer())] = base_level[decode(sprite.x().integer(), sprite.y().integer())];
+            break;
+        }
+        default:
+        {
+            x_speed = x;
+            y_speed = y;
+            int *base_level = (int *)current_room->resolve_level;
+            current_room->map[decode(sprite.x().integer(), sprite.y().integer())] = base_level[decode(sprite.x().integer(), sprite.y().integer())];
+            steps = 0;
+        }
+        }
     }
 
     void update()
@@ -185,6 +219,36 @@ void chari_sound(int chari, int sound)
     }
 }
 
+int intro()
+{
+    bn::sound_items::nana.play(0.5);
+
+    // Background stuff
+    bn::regular_bg_ptr bg_cinemint = bn::regular_bg_items::bg_cinemint.create_bg(0, 0);
+
+    // Bullet
+    bn::sprite_ptr cinemint = bn::sprite_items::cinemint.create_sprite(-42, 0);
+    bn::sprite_animate_action<36> cinemint_action = bn::create_sprite_animate_action_forever(
+        cinemint, 3, bn::sprite_items::cinemint.tiles_item(), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35);
+
+    int frame = 0;
+    while (true)
+    {
+        if (frame < 142)
+        {
+            cinemint_action.update();
+        }
+        else if (frame > 164)
+        {
+            return 0;
+        }
+        frame++;
+        bn::core::update();
+    }
+
+    return 0;
+}
+
 int linear_gameplay()
 {
     // Set up world
@@ -211,7 +275,7 @@ int linear_gameplay()
 
     // Set up vectors
     bn::vector<bn::sprite_ptr, 96> sprites_v;
-    bn::vector<Barrel, 4> sprites_b;
+    bn::vector<Barrel, 16> sprites_b;
     bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
     bn::vector<bn::sprite_ptr, 32> text_sprites;
 
@@ -238,6 +302,10 @@ int linear_gameplay()
         else if (current_room.map[i] == -2)
         {
             sprites_b.push_back(Barrel(resolve_x(i), resolve_y(i), &current_room));
+        }
+        else if (current_room.map[i] == -3)
+        {
+            sprites_b.push_back(Barrel(resolve_x(i), resolve_y(i), &current_room, 1));
         }
         // Everything else
         else if (current_room.map[i] > 0)
@@ -296,24 +364,57 @@ int linear_gameplay()
             {
                 if (sprites_b.at(i).sprite.x().integer() == pros_x - 16)
                 {
-                    notice = 1;
+                    switch (sprites_b.at(i).type)
+                    {
+                    case 1:
+                    {
+                        if (sprites_b.at(i).state == 0)
+                            notice = 3;
+                        break;
+                    }
+                    default:
+                    {
+                        notice = 1;
+                        break;
+                    }
+                    }
+
                     if (bn::keypad::a_pressed())
                     {
                         sprites_b.at(i).push(-2, 0);
-                        freefall = D_RIGHT;
-                        bn::sound_items::box_01.play(0.5);
-                        chari_sound(global->chari_offset, 1);
+                        if (sprites_b.at(i).type == 0)
+                        {
+                            freefall = D_RIGHT;
+                            bn::sound_items::box_01.play(0.5);
+                            chari_sound(global->chari_offset, 1);
+                        }
                     }
                 }
                 else if (sprites_b.at(i).sprite.x().integer() == pros_x + 16)
                 {
-                    notice = 1;
+                    switch (sprites_b.at(i).type)
+                    {
+                    case 1:
+                    {
+                        if (sprites_b.at(i).state == 0)
+                            notice = 3;
+                        break;
+                    }
+                    default:
+                    {
+                        notice = 1;
+                        break;
+                    }
+                    }
                     if (bn::keypad::a_pressed())
                     {
                         sprites_b.at(i).push(2, 0);
-                        freefall = D_LEFT;
-                        bn::sound_items::box_01.play(0.5);
-                        chari_sound(global->chari_offset, 1);
+                        if (sprites_b.at(i).type == 0)
+                        {
+                            freefall = D_LEFT;
+                            bn::sound_items::box_01.play(0.5);
+                            chari_sound(global->chari_offset, 1);
+                        }
                     }
                 }
             }
@@ -321,24 +422,56 @@ int linear_gameplay()
             {
                 if (sprites_b.at(i).sprite.y().integer() == pros_y - 16)
                 {
-                    notice = 1;
+                    switch (sprites_b.at(i).type)
+                    {
+                    case 1:
+                    {
+                        if (sprites_b.at(i).state == 0)
+                            notice = 3;
+                        break;
+                    }
+                    default:
+                    {
+                        notice = 1;
+                        break;
+                    }
+                    }
                     if (bn::keypad::a_pressed())
                     {
                         sprites_b.at(i).push(0, -2);
-                        freefall = D_DOWN;
-                        bn::sound_items::box_01.play(0.5);
-                        chari_sound(global->chari_offset, 1);
+                        if (sprites_b.at(i).type == 0)
+                        {
+                            freefall = D_DOWN;
+                            bn::sound_items::box_01.play(0.5);
+                            chari_sound(global->chari_offset, 1);
+                        }
                     }
                 }
                 else if (sprites_b.at(i).sprite.y().integer() == pros_y + 16)
                 {
-                    notice = 1;
+                    switch (sprites_b.at(i).type)
+                    {
+                    case 1:
+                    {
+                        if (sprites_b.at(i).state == 0)
+                            notice = 3;
+                        break;
+                    }
+                    default:
+                    {
+                        notice = 1;
+                        break;
+                    }
+                    }
                     if (bn::keypad::a_pressed())
                     {
                         sprites_b.at(i).push(0, 2);
-                        freefall = D_UP;
-                        bn::sound_items::box_01.play(0.5);
-                        chari_sound(global->chari_offset, 1);
+                        if (sprites_b.at(i).type == 0)
+                        {
+                            freefall = D_UP;
+                            bn::sound_items::box_01.play(0.5);
+                            chari_sound(global->chari_offset, 1);
+                        }
                     }
                 }
             }
@@ -353,14 +486,20 @@ int linear_gameplay()
         }
 
         // Is intro monologue happening?
-        if (text_sprites.size() > 0) {
-            for (int i = 0; i < text_sprites.size(); i++) {
-                if (text_sprites.at(i).y() < 72) {
+        if (text_sprites.size() > 0)
+        {
+            for (int i = 0; i < text_sprites.size(); i++)
+            {
+                if (text_sprites.at(i).y() < 72)
+                {
                     text_sprites.at(i).set_y(text_sprites.at(i).y() + 1);
                 }
-                if (text_delay < 16) {
+                if (text_delay < 16)
+                {
                     text_delay++;
-                } else if (!text_sprites.at(i).visible()) {
+                }
+                else if (!text_sprites.at(i).visible())
+                {
                     text_sprites.at(i).set_visible(true);
                     text_delay = 0;
                     bn::sound_items::click.play(0.3);
@@ -386,11 +525,11 @@ int linear_gameplay()
                 else
                 {
                     text_generator.generate(-6 * 16, 68, &base_string[0], text_sprites);
-                    for (int i = 0; i < text_sprites.size(); i++) {
-                        
+                    for (int i = 0; i < text_sprites.size(); i++)
+                    {
+
                         text_sprites.at(i).set_visible(false);
                     }
-                    
                 }
             }
 
@@ -411,7 +550,21 @@ int linear_gameplay()
                 {
                     const char *base_string = (char *)resolve_dialogue(0);
                     text_generator.generate(-6 * 16, 72, &base_string[0], text_sprites);
-                    for (int i = 0; i < text_sprites.size(); i++) {
+                    for (int i = 0; i < text_sprites.size(); i++)
+                    {
+                        text_sprites.at(i).set_visible(false);
+                    }
+                }
+            }
+            else if (notice == 3 && button.x() < -7 * 16)
+            {
+                button.set_x(button.x() + 2);
+                if (text_sprites.size() == 0)
+                {
+                    const char *base_string = (char *)resolve_dialogue(0, 1);
+                    text_generator.generate(-6 * 16, 72, &base_string[0], text_sprites);
+                    for (int i = 0; i < text_sprites.size(); i++)
+                    {
                         text_sprites.at(i).set_visible(false);
                     }
                 }
@@ -1091,9 +1244,10 @@ int main()
         0};
     global = &global_instance;
 
-    bn::music_items::harp.play(0.5);
+    intro();
 
     // Main gameplay loop
+    bn::music_items::harp.play(0.5);
     while (global->current_level < TOTAL_LEVELS)
     {
         bn::sound_items::alert.play(0.5);
