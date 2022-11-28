@@ -494,7 +494,7 @@ int linear_gameplay()
                 {
                     text_sprites.at(i).set_y(text_sprites.at(i).y() + 1);
                 }
-                if (text_delay < 16)
+                else if (text_delay < 16)
                 {
                     text_delay++;
                 }
@@ -538,6 +538,12 @@ int linear_gameplay()
                 current_room.intro_monologue_pos++;
                 text_sprites.clear();
                 button.set_x(button.x() - 4);
+            }
+
+            if (bn::keypad::b_pressed())
+            {
+                current_room.intro_monologue = 0;
+                notice = 0;
             }
         }
         else
@@ -586,6 +592,14 @@ int linear_gameplay()
 
                     if (current_room.map[spot] == 1)
                     {
+                        for (int i = 0; i < sprites_b.size(); i++)
+                        {
+                            if (bn::abs((sprites_b.at(i).sprite.x() - bullet.x()).integer()) + bn::abs((sprites_b.at(i).sprite.y() - bullet.y()).integer()) < 18)
+                            {
+                                sprites_b.at(i).push(0, 0);
+                            }
+                        }
+
                         int deduction = 360;
                         if (bn::abs(decode(bullet.x().integer(), bullet.y().integer()) - spot) <= 2)
                             deduction = 540;
@@ -1233,6 +1247,52 @@ int linear_gameplay()
         bn::core::update();
     }
     return 0;
+}
+
+int cutscenes(int scene)
+{
+    bn::vector<bn::sprite_ptr, 32> text_sprites;
+    int pos = 0;
+    int text_delay = 0;
+
+    // Is intro monologue happening?
+    if (text_sprites.size() > 0)
+    {
+        for (int i = 0; i < text_sprites.size(); i++)
+        {
+            if (text_sprites.at(i).y() < 72)
+            {
+                text_sprites.at(i).set_y(text_sprites.at(i).y() + 1);
+            }
+            if (text_delay < 16)
+            {
+                text_delay++;
+            }
+            else if (!text_sprites.at(i).visible())
+            {
+                text_sprites.at(i).set_visible(true);
+                text_delay = 0;
+                bn::sound_items::click.play(0.3);
+                i = text_sprites.size();
+            }
+        }
+    }
+    if (text_sprites.size() == 0)
+    {
+        const char *base_string = (char *)resolve_dialogue(scene, pos);
+        if (base_string[0] == '$')
+        {
+            return 0;
+        }
+        else
+        {
+            text_generator.generate(-6 * 16, 68, &base_string[0], text_sprites);
+            for (int i = 0; i < text_sprites.size(); i++)
+            {
+                text_sprites.at(i).set_visible(false);
+            }
+        }
+    }
 }
 
 int main()
