@@ -75,6 +75,18 @@ const int l_tables[135] = {
     1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, 1};
 
+const int l_button[135] = {
+    1,0,1,1,1,1,-7,1,1,1,1,1,1,1,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,-5, 0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+};
+
 #define TOTAL_LEVELS 7
 
 // Custom classes
@@ -98,7 +110,7 @@ public:
             start_x = encode_x(8);
             start_y = encode_y(7);
             intro_monologue = 1;
-            resolve_level = l_tunnel;
+            resolve_level = l_button;
             break;
         }
         case 1:
@@ -149,6 +161,12 @@ public:
             start_y = encode_y(7);
             resolve_level = l_tables;
             break;
+        }
+        case 8:
+        {
+            start_x = encode_x(8);
+            start_y = encode_y(7);
+            resolve_level = l_button;
         }
         }
         bn::memcpy(map, resolve_level, sizeof(map));

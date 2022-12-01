@@ -1,0 +1,27 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+    },
+    "last.imagePath": "C:/Users/Ethan.KINTSUGI-WIN/Documents/GitHub/space-titanic/games/space-titanic/graphics",
+    "map.height": 2,
+    "map.tileHeight": 64,
+    "map.tileWidth": 64,
+    "map.width": 3,
+    "openFiles": [
+    ],
+    "project": "cutscene.tiled-project",
+    "recentFiles": [
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 64,
+        "width": 64
+    }
+}

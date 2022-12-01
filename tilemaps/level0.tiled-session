@@ -1,5 +1,7 @@
 {
-    "activeFile": "lvl0.tmx",
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
     "fileStates": {
         "lvl0.tmx": {
             "scale": 2,
@@ -15,9 +17,8 @@
         }
     },
     "openFiles": [
-        "world.tsx",
-        "lvl0.tmx"
     ],
+    "project": "",
     "recentFiles": [
         "world.tsx",
         "lvl0.tmx"

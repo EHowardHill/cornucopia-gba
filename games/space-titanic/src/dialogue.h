@@ -15,6 +15,10 @@ const char d_intro_01[][32] = {
     "I'm sure they'll come in handy.",
     "$"};
 
+const char d_journal01[][48] = {
+    "Dear diary, first day is over!",
+    "$"};
+
 void const *resolve_dialogue(int requested_dialogue, int position = 0)
 {
     switch (requested_dialogue)
@@ -22,6 +26,11 @@ void const *resolve_dialogue(int requested_dialogue, int position = 0)
     case 1:
     {
         return &d_intro_01[position];
+        break;
+    }
+    case 2:
+    {
+        return &d_journal01[position];
         break;
     }
     default:
