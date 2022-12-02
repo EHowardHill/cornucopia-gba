@@ -1,7 +1,11 @@
 /*
- * Copyright (c) 2020-2022 Gustavo Valiente gustavo.valiente@protonmail.com
- * zlib License, see LICENSE file.
- */
+    Cornucopia, by Ethan Hill
+
+    License for Butano:
+
+    Copyright (c) 2020-2022 Gustavo Valiente gustavo.valiente@protonmail.com
+    zlib License, see LICENSE file.
+*/
 
 // Butano libraries
 #include "bn_core.h"
@@ -296,7 +300,7 @@ int linear_gameplay()
 
     // Set up vectors
     bn::vector<bn::sprite_ptr, 96> sprites_v;
-    bn::vector<Barrel, 16> sprites_b;
+    bn::vector<Barrel, 26> sprites_b;
     bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
     bn::vector<bn::sprite_ptr, 32> text_sprites;
 
@@ -344,13 +348,12 @@ int linear_gameplay()
         }
         else if (current_room.map[i] == -7)
         {
-            bn::sprite_ptr n = bn::sprite_items::items.create_sprite(resolve_x(i), resolve_y(i), 6);
-            exit_door = n;
             exit_door_loc = i;
             exit_door_init = true;
+            exit_button_init = true;
+            bn::sprite_ptr n = bn::sprite_items::items.create_sprite(resolve_x(i), resolve_y(i), 6);
+            exit_door = n;
             current_room.map[i] = 1;
-            n.put_below();
-            sprites_v.push_back(n);
         }
         // Everything else
         else if (current_room.map[i] > 0)
@@ -359,6 +362,8 @@ int linear_gameplay()
             sprites_v.push_back(n);
         }
     }
+
+    exit_door.value().set_horizontal_scale(1);
 
     // Spiral
     bn::sprite_ptr spiral = bn::sprite_items::projectiles.create_sprite(0, 0, 6);
@@ -377,7 +382,6 @@ int linear_gameplay()
     bullet.set_z_order(0);
 
     // Create player
-    BN_LOG(pros_x);
     bn::sprite_ptr player = bn::sprite_items::chari.create_sprite(pros_x, pros_y, 1);
 
     bn::sprite_animate_action<4> action = bn::create_sprite_animate_action_forever(
@@ -407,7 +411,6 @@ int linear_gameplay()
 #define entr_door_max 1
         if (entr_door.horizontal_scale() < entr_door_max)
         {
-            BN_LOG(entr_door.horizontal_scale());
             auto scale = entr_door.horizontal_scale() + bn::fixed(0.1);
             if (scale < entr_door_max)
             {
@@ -554,7 +557,7 @@ int linear_gameplay()
         {
             if (
                 (bn::abs(player.x() - exit_button.value().x()) + bn::abs(player.y() - exit_button.value().y()) < 16) ||
-                (bn::abs(bullet.x() - exit_button.value().x()) + bn::abs(bullet.y() - exit_button.value().y()) < 16))
+                (bn::abs(bullet.x() - exit_button.value().x()) + bn::abs(bullet.y() - exit_button.value().y()) < 16 && bullet.visible()))
             {
                 exit_button_init = false;
                 exit_button.value().set_visible(false);
@@ -567,7 +570,8 @@ int linear_gameplay()
         }
         else if (exit_door_init)
         {
-            auto scale = exit_door.value().horizontal_scale() - bn::fixed(0.1);
+            bn::fixed scale = exit_door.value().horizontal_scale() - bn::fixed(0.1);
+            BN_LOG(scale);
             if (scale > 0)
             {
                 exit_door.value().set_horizontal_scale(scale);
@@ -1518,7 +1522,6 @@ int show_cutscenes(int scene)
                 const char *base_string = (char *)resolve_dialogue(scene, pos);
                 char sent1[36] = {};
                 char sent2[35] = {};
-                BN_LOG(sent1);
 
                 color = base_string[0];
                 for (int i = 1; i < 71; i++)
@@ -1631,8 +1634,8 @@ int main()
         0}; // current character
     global = &global_instance;
 
-    show_cutscenes(2);
-    intro();
+    //show_cutscenes(2);
+    //intro();
 
     // Main gameplay loop
     bn::music_items::harp.play(0.5);
