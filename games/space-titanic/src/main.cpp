@@ -42,7 +42,14 @@
 #include "bn_regular_bg_items_bg_space.h"
 
 // Cutscenes
+#include "bn_sprite_items_cutscene00.h"
 #include "bn_sprite_items_cutscene01.h"
+#include "bn_sprite_items_cutscene02.h"
+#include "bn_sprite_items_cutscene03.h"
+#include "bn_sprite_items_cutscene04.h"
+#include "bn_sprite_items_cutscene05.h"
+#include "bn_sprite_items_cutscene06.h"
+#include "bn_sprite_items_cutscene07.h"
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
@@ -51,6 +58,8 @@
 #define decode(x, y) ((x + 120) / 16) + (15 * (((y + 80) / 16) % 15))
 #define lerp(a, b, t) (a * (1 - t) + b * t)
 #define escape(x, y) (x < -120 || x > 120 || y < -80 || y > 80)
+
+#define push_tile(q) tiles.push_back(bn::sprite_items::q.create_sprite(-64 + (x * 64), -32 + (y * 64) - 8, (frame * 2) + y + (x * maxframes * 2)));
 
 #define gravity_allow(x) (x == 0 || x == -1)
 #define antigravity_allow(x) (x != 1 || x < -1)
@@ -273,12 +282,17 @@ int linear_gameplay()
     int trig_offset = 0;
     int bullet_count = 0;
     int text_delay = 0;
-
-    int exit_button_init = false;
+    int exit_door_loc = 0;
+    bool exit_door_init = false;
+    bool exit_button_init = false;
     bn::optional<bn::sprite_ptr> exit_button;
-
+    bn::optional<bn::sprite_ptr> exit_door;
     bn::fixed bullet_x;
     bn::fixed bullet_y;
+
+    // Entrance door
+    bn::sprite_ptr entr_door = bn::sprite_items::items.create_sprite(0, 0, 7);
+    entr_door.set_horizontal_scale(0.1);
 
     // Set up vectors
     bn::vector<bn::sprite_ptr, 96> sprites_v;
@@ -323,9 +337,18 @@ int linear_gameplay()
             n.put_below();
             sprites_v.push_back(n);
         }
+        else if (current_room.map[i] == -6)
+        {
+            entr_door.set_position(resolve_x(i) - 10, resolve_y(i));
+            current_room.map[i] = 1;
+        }
         else if (current_room.map[i] == -7)
         {
             bn::sprite_ptr n = bn::sprite_items::items.create_sprite(resolve_x(i), resolve_y(i), 6);
+            exit_door = n;
+            exit_door_loc = i;
+            exit_door_init = true;
+            current_room.map[i] = 1;
             n.put_below();
             sprites_v.push_back(n);
         }
@@ -354,7 +377,8 @@ int linear_gameplay()
     bullet.set_z_order(0);
 
     // Create player
-    bn::sprite_ptr player = bn::sprite_items::chari.create_sprite(current_room.start_x, current_room.start_y, 1);
+    BN_LOG(pros_x);
+    bn::sprite_ptr player = bn::sprite_items::chari.create_sprite(pros_x, pros_y, 1);
 
     bn::sprite_animate_action<4> action = bn::create_sprite_animate_action_forever(
         player, 4, bn::sprite_items::chari.tiles_item(), 0, 0, 0, 0);
@@ -377,6 +401,24 @@ int linear_gameplay()
         {
             window_y -= 10;
             external_window.set_boundaries(-80, -120, window_y, 120);
+        }
+
+// Handle door
+#define entr_door_max 1
+        if (entr_door.horizontal_scale() < entr_door_max)
+        {
+            BN_LOG(entr_door.horizontal_scale());
+            auto scale = entr_door.horizontal_scale() + bn::fixed(0.1);
+            if (scale < entr_door_max)
+            {
+                entr_door.set_horizontal_scale(scale);
+            }
+            else
+            {
+                bn::sound_items::box_01.play();
+                entr_door.set_horizontal_scale(entr_door_max);
+            }
+            entr_door.set_x(entr_door.x() + 1);
         }
 
         // Handle barrels
@@ -508,8 +550,12 @@ int linear_gameplay()
         }
 
         // Handle buttons
-        if (exit_button_init) {
-            if (bn::abs(player.x() - exit_button.value().x()) + bn::abs(player.y() - exit_button.value().y()) < 16) {
+        if (exit_button_init)
+        {
+            if (
+                (bn::abs(player.x() - exit_button.value().x()) + bn::abs(player.y() - exit_button.value().y()) < 16) ||
+                (bn::abs(bullet.x() - exit_button.value().x()) + bn::abs(bullet.y() - exit_button.value().y()) < 16))
+            {
                 exit_button_init = false;
                 exit_button.value().set_visible(false);
                 bn::sound_items::box_01.play();
@@ -517,6 +563,22 @@ int linear_gameplay()
                 int leg_y = exit_button.value().y().integer();
                 exit_button.value() = bn::sprite_items::items.create_sprite(leg_x, leg_y, 5);
                 exit_button.value().put_below();
+            }
+        }
+        else if (exit_door_init)
+        {
+            auto scale = exit_door.value().horizontal_scale() - bn::fixed(0.1);
+            if (scale > 0)
+            {
+                exit_door.value().set_horizontal_scale(scale);
+                exit_door.value().set_x(exit_door.value().x() - 2);
+            }
+            else
+            {
+                exit_door.value().set_visible(false);
+                exit_door_init = false;
+                current_room.map[exit_door_loc] = 0;
+                bn::sound_items::box_02.play();
             }
         }
 
@@ -1286,14 +1348,17 @@ int linear_gameplay()
 
 int show_cutscenes(int scene)
 {
-    int step = 60;
     int frame = 0;
     int maxframes = 30;
     int pos = 0;
-    int text_delay = 0;
+    int cutscene = 1;
     bool loaded = false;
+    char color = 0;
     bn::vector<bn::sprite_ptr, 6> tiles;
-    bn::vector<bn::sprite_ptr, 48> text_sprites;
+    bn::vector<bn::sprite_ptr, 35> text_sprites1;
+    bn::vector<bn::sprite_ptr, 35> text_sprites2;
+
+    bn::music_items::bored2.play(0.5);
 
     // Background stuff
     bn::regular_bg_ptr bg_space = bn::regular_bg_items::bg_space.create_bg(0, 0);
@@ -1301,18 +1366,83 @@ int show_cutscenes(int scene)
 
     while (true)
     {
-
         // 6:1 loop
         tiles.clear();
 
+        // Set cutscene
         for (int x = 0; x < 3; x++)
         {
             for (int y = 0; y < 2; y++)
             {
-                tiles.push_back(bn::sprite_items::cutscene01.create_sprite(-64 + (x * 64), -32 + (y * 64) - 8, (frame * 2) + y + (x * step)));
+                switch (cutscene)
+                {
+                case 0:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene00);
+                    break;
+                }
+                case 1:
+                {
+                    maxframes = 30;
+                    push_tile(cutscene01);
+                    break;
+                }
+                case 2:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene02);
+                    break;
+                }
+                case 3:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene03);
+                    break;
+                }
+                case 4:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene04);
+                    break;
+                }
+                case 5:
+                {
+                    maxframes = 26;
+                    push_tile(cutscene05);
+                    break;
+                }
+                case 6:
+                {
+                    maxframes = 6;
+                    push_tile(cutscene06);
+                    break;
+                }
+                case 7:
+                {
+                    maxframes = 15;
+                    push_tile(cutscene07);
+                    break;
+                }
+                default:
+                {
+                    maxframes = 30;
+                    push_tile(cutscene01);
+                    break;
+                }
+                }
             }
         }
 
+        if (maxframes == 3)
+        {
+            // frame = frame + 1;
+            loaded = true;
+            if (frame >= maxframes)
+            {
+                frame = maxframes - 3;
+            }
+        }
         if (frame < maxframes - 3)
         {
             frame = (frame + 1) % maxframes;
@@ -1327,50 +1457,160 @@ int show_cutscenes(int scene)
             }
         }
 
+        // Is intro monologue happening?
+        if (loaded)
+        {
+            if (text_sprites1.size() > 0)
+            {
+                for (int i = 0; i < text_sprites1.size(); i++)
+                {
+                    if (!text_sprites1.at(i).visible())
+                    {
+                        text_sprites1.at(i).set_visible(true);
+                        switch (color)
+                        {
+                        default:
+                        {
+                            bn::sound_items::speech_luna.play(0.3);
+                            break;
+                        }
+                        case '1':
+                        {
+                            bn::sound_items::speech_luna.play(0.3);
+                            break;
+                        }
+                        }
+                        i = text_sprites1.size();
+                    }
+                }
+            }
+            if (text_sprites2.size() > 0)
+            {
+                for (int i = 0; i < text_sprites2.size(); i++)
+                {
+                    if (!text_sprites2.at(i).visible())
+                    {
+                        text_sprites2.at(i).set_visible(true);
+                        i = text_sprites2.size();
+                    }
+                }
+            }
+        }
+
         // 1:1 loop
         for (int n = 0; n < 6; n++)
         {
+            if (bn::keypad::a_pressed())
+            {
+                text_sprites1.clear();
+                text_sprites2.clear();
+                pos++;
+            }
+
             bg_space.set_x((bg_space.x() + 1).integer() % 256);
             if (button.x() < (-7 * 16))
             {
                 button.set_x(button.x() + 1);
             }
 
-            // Is intro monologue happening?
-            if (text_sprites.size() > 0 && loaded)
-            {
-                for (int i = 0; i < text_sprites.size(); i++)
-                {
-                    if (text_sprites.at(i).y() < 72)
-                    {
-                        text_sprites.at(i).set_y(text_sprites.at(i).y() + 1);
-                    }
-                    if (text_delay < 16)
-                    {
-                        text_delay++;
-                    }
-                    else if (!text_sprites.at(i).visible())
-                    {
-                        text_sprites.at(i).set_visible(true);
-                        text_delay = 0;
-                        bn::sound_items::click.play(0.3);
-                        i = text_sprites.size();
-                    }
-                }
-            }
-            if (text_sprites.size() == 0)
+            if (text_sprites1.size() == 0)
             {
                 const char *base_string = (char *)resolve_dialogue(scene, pos);
-                if (base_string[0] == '$')
+                char sent1[36] = {};
+                char sent2[35] = {};
+                BN_LOG(sent1);
+
+                color = base_string[0];
+                for (int i = 1; i < 71; i++)
+                {
+                    if (base_string[i] == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        if (i < 36)
+                        {
+                            sent1[i - 1] = base_string[i];
+                        }
+                        else
+                        {
+                            sent2[i - 36] = base_string[i];
+                        }
+                    }
+                }
+
+                if (sent1[0] == '$')
                 {
                     return 0;
                 }
+                else if (strcmp(sent1, "S00") == 0)
+                {
+                    cutscene = 0;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S01") == 0)
+                {
+                    cutscene = 1;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S02") == 0)
+                {
+                    cutscene = 2;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S03") == 0)
+                {
+                    cutscene = 3;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S04") == 0)
+                {
+                    cutscene = 4;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S05") == 0)
+                {
+                    cutscene = 5;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S06") == 0)
+                {
+                    cutscene = 6;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S07") == 0)
+                {
+                    cutscene = 7;
+                    frame = 0;
+                    pos++;
+                }
                 else
                 {
-                    text_generator.generate(-6 * 16, 68, &base_string[0], text_sprites);
-                    for (int i = 0; i < text_sprites.size(); i++)
+                    text_generator.generate(-6 * 16, 64, sent1, text_sprites1);
+                    text_generator.generate(-6 * 16, 74, sent2, text_sprites2);
+                    for (int i = 0; i < text_sprites1.size(); i++)
                     {
-                        text_sprites.at(i).set_visible(false);
+                        if (color == '1')
+                        {
+                            text_sprites1.at(i).set_palette(bn::sprite_items::buttons.palette_item());
+                        }
+                        text_sprites1.at(i).set_visible(false);
+                    }
+                    for (int i = 0; i < text_sprites2.size(); i++)
+                    {
+                        if (color == '1')
+                        {
+                            text_sprites2.at(i).set_palette(bn::sprite_items::buttons.palette_item());
+                        }
+                        text_sprites2.at(i).set_visible(false);
                     }
                 }
             }
@@ -1382,65 +1622,17 @@ int show_cutscenes(int scene)
     return 0;
 }
 
-int cutscenes(int scene)
-{
-    bn::vector<bn::sprite_ptr, 32> text_sprites;
-    int pos = 0;
-    int text_delay = 0;
-
-    // Is intro monologue happening?
-    if (text_sprites.size() > 0)
-    {
-        for (int i = 0; i < text_sprites.size(); i++)
-        {
-            if (text_sprites.at(i).y() < 72)
-            {
-                text_sprites.at(i).set_y(text_sprites.at(i).y() + 1);
-            }
-            if (text_delay < 16)
-            {
-                text_delay++;
-            }
-            else if (!text_sprites.at(i).visible())
-            {
-                text_sprites.at(i).set_visible(true);
-                text_delay = 0;
-                bn::sound_items::click.play(0.3);
-                i = text_sprites.size();
-            }
-        }
-    }
-    if (text_sprites.size() == 0)
-    {
-        const char *base_string = (char *)resolve_dialogue(scene, pos);
-        if (base_string[0] == '$')
-        {
-            return 0;
-        }
-        else
-        {
-            text_generator.generate(-6 * 16, 68, &base_string[0], text_sprites);
-            for (int i = 0; i < text_sprites.size(); i++)
-            {
-                text_sprites.at(i).set_visible(false);
-            }
-        }
-    }
-
-    return 0;
-}
-
 int main()
 {
     // Initialization
     bn::core::init();
     global_data global_instance = {
-        0,
-        0};
+        -1, // current level
+        0}; // current character
     global = &global_instance;
 
-    // show_cutscenes(2);
-    // intro();
+    show_cutscenes(2);
+    intro();
 
     // Main gameplay loop
     bn::music_items::harp.play(0.5);
