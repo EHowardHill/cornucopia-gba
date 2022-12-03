@@ -225,11 +225,13 @@ public:
             resolve_level = l_tables;
             break;
         }
+
+        // Xylia levels
         case 7:
         {
             start_x = encode_x(8);
             start_y = encode_y(7);
-            resolve_level = l_tables;
+            resolve_level = l_dining;
             break;
         }
         case 8:

@@ -39,7 +39,7 @@ const char d_intro_01[][32] = {
     "Okay.. Gravity is out.",
     "Escaping won't be easy,",
     "but I'm sure I can find a way",
-    "using those boxes.",
+    "using those crates.",
     "$"};
 
 const char d_journal01[][81] = {
@@ -84,6 +84,7 @@ const char d_journal01[][81] = {
     "0....",
     "0...Alright, now we wait.",
     " S08",
+    " M_KILL",
     "...uggggggh",
     "0How long has it been? It is time tosee how Jasper and Xylia are doing?",
     " S09",

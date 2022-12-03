@@ -34,6 +34,8 @@
 #include "common_variable_8x8_sprite_font.h"
 
 // My assets
+#include "bn_sprite_items_beegui.h"
+#include "bn_sprite_items_tukatuka.h"
 #include "bn_sprite_items_cinemint.h"
 #include "bn_sprite_items_chari.h"
 #include "bn_sprite_items_ninja.h"
@@ -45,6 +47,7 @@
 #include "bn_regular_bg_items_bg_carpet.h"
 #include "bn_regular_bg_items_bg_cinemint.h"
 #include "bn_regular_bg_items_bg_space.h"
+#include "bn_regular_bg_items_bg_message.h"
 
 // Cutscenes
 #include "bn_sprite_items_cutscene00.h"
@@ -867,7 +870,17 @@ int linear_gameplay()
                 if (bn::keypad::l_pressed() || bn::keypad::r_pressed())
                 {
                     indicate = false;
+
                     global->chari_offset = (global->chari_offset + XYLIA) % 39;
+
+                    if (global->current_level < 7 && global->chari_offset > LUNA) {
+                        global->chari_offset = LUNA;
+                    } else if (global->current_level < 14 && global->chari_offset > XYLIA) {
+                        global->chari_offset = LUNA;
+                    } else if (global->chari_offset > JASPER) {
+                        global->chari_offset = LUNA;
+                    }
+
                     bullet.set_visible(false);
                     for (int i = 0; i < sprites_v.size(); i++)
                     {
@@ -1410,6 +1423,12 @@ int show_cutscenes(int scene)
         // 6:1 loop
         tiles.clear();
 
+        bg_space.set_x((bg_space.x() + 1).integer() % 256);
+        if (button.x() < (-7 * 16))
+        {
+            button.set_x(button.x() + 1);
+        }
+
         // Set cutscene
         for (int x = 0; x < 3; x++)
         {
@@ -1567,15 +1586,10 @@ int show_cutscenes(int scene)
         {
             if (bn::keypad::a_pressed())
             {
+                button.set_x(button.x() - 1);
                 text_sprites1.clear();
                 text_sprites2.clear();
                 pos++;
-            }
-
-            bg_space.set_x((bg_space.x() + 1).integer() % 256);
-            if (button.x() < (-7 * 16))
-            {
-                button.set_x(button.x() + 1);
             }
 
             if (text_sprites1.size() == 0)
@@ -1680,6 +1694,13 @@ int show_cutscenes(int scene)
                     frame = 0;
                     pos++;
                 }
+                else if (strcmp(sent1, "M_KILL") == 0)
+                {
+                    if (bn::music::playing())
+                        bn::music::stop();
+                    frame = 0;
+                    pos++;
+                }
                 else
                 {
                     text_generator.generate(-6 * 16, 64, sent1, text_sprites1);
@@ -1712,45 +1733,113 @@ int show_cutscenes(int scene)
 
 int mainmenu()
 {
+    int window_y = 120;
+
     // Background stuff
     bn::regular_bg_ptr bg_space = bn::regular_bg_items::bg_space.create_bg(0, 0);
 
     bn::sprite_ptr logo[3] = {
         bn::sprite_items::logo.create_sprite(-74, 0, 0),
         bn::sprite_items::logo.create_sprite(0, 0, 1),
-        bn::sprite_items::logo.create_sprite(74, 0, 2)
-    };
+        bn::sprite_items::logo.create_sprite(74, 0, 2)};
+
+    bn::sprite_ptr beegui = bn::sprite_items::beegui.create_sprite(0, -128);
+    beegui.set_blending_enabled(true);
+
+    bn::sprite_ptr fire = bn::sprite_items::tukatuka.create_sprite(-180, -8, 1);
+    bn::sprite_ptr ship = bn::sprite_items::tukatuka.create_sprite(-180, 0);
+
+    bn::sprite_animate_action<2> fire_action = bn::create_sprite_animate_action_forever(
+        fire, 3, bn::sprite_items::tukatuka.tiles_item(), 1, 2);
+
+    // Entrance / exit window
+    bn::rect_window external_window = bn::rect_window::external();
+    external_window.set_show_bg(bg_space, false);
+    external_window.set_show_sprites(false);
+    external_window.set_boundaries(-80, -120, 80, window_y);
 
     logo[0].set_scale(2);
     logo[1].set_scale(2);
     logo[2].set_scale(2);
     int stage = 0;
 
-    while (true) {
-        bn::fixed scale = logo[0].horizontal_scale() - bn::fixed(0.1);
+    while (true)
+    {
 
-        if (scale >= 1) {
-            for (int i = 0; i < 3; i++) {
-                logo[i].set_scale(scale, scale);
+        // Handle window
+        if (window_y > -80)
+        {
+            window_y -= 10;
+            external_window.set_boundaries(-80, -120, window_y, 120);
+        }
+        else
+        {
+            bn::fixed scale = logo[0].horizontal_scale() - bn::fixed(0.1);
+            bg_space.set_x(bg_space.x() + bn::fixed(0.2));
+
+            if (scale >= 1)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    logo[i].set_scale(scale, scale);
+                    logo[i].set_blending_enabled(true);
+                }
+                logo[0].set_x(logo[0].x() + 1);
+                logo[2].set_x(logo[2].x() - 1);
             }
-            logo[0].set_x(logo[0].x() + 1);
-            logo[2].set_x(logo[2].x() - 1);
-        } else if (stage == 0) {
-            bn::sound_items::pew.play();
-            stage = 1;
-            bn::music_items::hon.play(1);
-        } else if (stage < 48) {
-            stage++;
-        } else if (stage == 48) {
-            stage = 49;
-        } else if (stage == 49) {
-            for (int i = 0; i < 3; i++) {
-                logo[i].set_y(lerp(logo[i].y(), 50, bn::fixed(0.15)));
+            else if (stage == 0)
+            {
+                bn::sound_items::pew.play();
+                stage = 1;
+                bn::music_items::hon.play(1);
+            }
+            else if (stage < 48)
+            {
+                stage++;
+            }
+            else if (stage == 48)
+            {
+                stage = 49;
+            }
+            else if (stage == 49)
+            {
+                beegui.set_y(lerp(beegui.y(), -60, bn::fixed(0.15)));
+                for (int i = 0; i < 3; i++)
+                {
+                    logo[i].set_y(lerp(logo[i].y(), 50, bn::fixed(0.15)));
+                }
+            }
+            else if (stage > 49)
+            {
+                stage++;
+                bn::blending::set_transparency_alpha(lerp(bn::blending::transparency_alpha(), 0, bn::fixed(0.05)));
+
+                ship.set_x(ship.x() + bn::fixed(1.2));
+                fire.set_x(ship.x() - 60);
+
+                if (stage % 42 == 0)
+                {
+                    bn::sound_items::shepard.play(0.3);
+                }
+
+                if (stage > 360)
+                {
+                    return 0;
+                }
             }
         }
 
-        BN_LOG(stage);
+        if ((bn::keypad::a_pressed() || bn::keypad::start_pressed()) && stage < 50)
+        {
+            stage = 50;
+            bn::sound_items::click.play();
+            if (bn::music::playing())
+            {
+                bn::music::stop();
+            }
+        }
 
+        fire_action.update();
         bn::core::update();
     }
 }
@@ -1764,19 +1853,24 @@ int main()
         0}; // current character
     global = &global_instance;
 
-    //intro();
+    intro();
     mainmenu();
     show_cutscenes(2);
 
     // Main gameplay loop
     bn::music_items::harp.play(0.5);
-    while (global->current_level < TOTAL_LEVELS)
+    while (global->current_level < 7)
     {
         bn::sound_items::alert.play(0.5);
         global->current_level += linear_gameplay();
     }
 
     // Fallback so it doesn't up and crash
+    if (bn::music::playing()) {
+        bn::music::stop();
+    }
+    bn::regular_bg_ptr bg_message = bn::regular_bg_items::bg_message.create_bg(0, 0);
+    bn::music_items::anata.play();
     while (true)
     {
         bn::core::update();
