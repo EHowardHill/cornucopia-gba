@@ -36,16 +36,10 @@ const char d_messages[][32] = {
     "Break rotten crate"};
 
 const char d_intro_01[][32] = {
-    "Testing? Testing? This is KAM,",
-    "Coming to you loud and clear",
-    "over the intercom... I hope.",
-    "So it looks like the artificial",
-    "gravity, much like what you're",
-    "clinging to, is AWOL.",
-    "But it's no matter - all the",
-    "furniture is bolted down.",
-    "Except for the crates, that is.",
-    "I'm sure they'll come in handy.",
+    "Okay.. Gravity is out.",
+    "Escaping won't be easy,",
+    "but I'm sure I can find a way",
+    "using those boxes.",
     "$"};
 
 const char d_journal01[][81] = {
@@ -89,10 +83,17 @@ const char d_journal01[][81] = {
     "0...",
     "0....",
     "0...Alright, now we wait.",
-    "0Well, I'm bored.                   Time to check on the others.",
+    " S08",
+    "...uggggggh",
+    "0How long has it been? It is time tosee how Jasper and Xylia are doing?",
+    " S09",
+    "Ehh.. I'm sure they're fine.",
+    " S10",
+    "...",
+    " S11",
     "0What the-                          Who turned the gravity off?",
     "0I guess it's, uh.. It's REALLY     time to check on the others.",
-    "$"};
+    " $"};
 
 void const *resolve_dialogue(int requested_dialogue, int position = 0)
 {

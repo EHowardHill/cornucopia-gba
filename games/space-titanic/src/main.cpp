@@ -41,6 +41,7 @@
 #include "bn_sprite_items_items.h"
 #include "bn_sprite_items_buttons.h"
 #include "bn_sprite_items_projectiles.h"
+#include "bn_sprite_items_logo.h"
 #include "bn_regular_bg_items_bg_carpet.h"
 #include "bn_regular_bg_items_bg_cinemint.h"
 #include "bn_regular_bg_items_bg_space.h"
@@ -54,6 +55,10 @@
 #include "bn_sprite_items_cutscene05.h"
 #include "bn_sprite_items_cutscene06.h"
 #include "bn_sprite_items_cutscene07.h"
+#include "bn_sprite_items_cutscene08.h"
+#include "bn_sprite_items_cutscene09.h"
+#include "bn_sprite_items_cutscene10.h"
+#include "bn_sprite_items_cutscene11.h"
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
@@ -273,7 +278,7 @@ int linear_gameplay()
     current_room.setup(global->current_level);
 
     // Variable init
-    bool gravity = true;
+    bool gravity = false;
     bool indicate = false;
     int pros_x = current_room.start_x;
     int pros_y = current_room.start_y;
@@ -1460,6 +1465,30 @@ int show_cutscenes(int scene)
                     push_tile(cutscene07);
                     break;
                 }
+                case 8:
+                {
+                    maxframes = 13;
+                    push_tile(cutscene08);
+                    break;
+                }
+                case 9:
+                {
+                    maxframes = 9;
+                    push_tile(cutscene09);
+                    break;
+                }
+                case 10:
+                {
+                    maxframes = 18;
+                    push_tile(cutscene10);
+                    break;
+                }
+                case 11:
+                {
+                    maxframes = 19;
+                    push_tile(cutscene11);
+                    break;
+                }
                 default:
                 {
                     maxframes = 30;
@@ -1575,7 +1604,7 @@ int show_cutscenes(int scene)
                     }
                 }
 
-                if (sent1[0] == '$')
+                if (strcmp(sent1, "$") == 0)
                 {
                     return 0;
                 }
@@ -1627,6 +1656,30 @@ int show_cutscenes(int scene)
                     frame = 0;
                     pos++;
                 }
+                else if (strcmp(sent1, "S08") == 0)
+                {
+                    cutscene = 8;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S09") == 0)
+                {
+                    cutscene = 9;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S10") == 0)
+                {
+                    cutscene = 10;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S11") == 0)
+                {
+                    cutscene = 11;
+                    frame = 0;
+                    pos++;
+                }
                 else
                 {
                     text_generator.generate(-6 * 16, 64, sent1, text_sprites1);
@@ -1657,6 +1710,51 @@ int show_cutscenes(int scene)
     return 0;
 }
 
+int mainmenu()
+{
+    // Background stuff
+    bn::regular_bg_ptr bg_space = bn::regular_bg_items::bg_space.create_bg(0, 0);
+
+    bn::sprite_ptr logo[3] = {
+        bn::sprite_items::logo.create_sprite(-74, 0, 0),
+        bn::sprite_items::logo.create_sprite(0, 0, 1),
+        bn::sprite_items::logo.create_sprite(74, 0, 2)
+    };
+
+    logo[0].set_scale(2);
+    logo[1].set_scale(2);
+    logo[2].set_scale(2);
+    int stage = 0;
+
+    while (true) {
+        bn::fixed scale = logo[0].horizontal_scale() - bn::fixed(0.1);
+
+        if (scale >= 1) {
+            for (int i = 0; i < 3; i++) {
+                logo[i].set_scale(scale, scale);
+            }
+            logo[0].set_x(logo[0].x() + 1);
+            logo[2].set_x(logo[2].x() - 1);
+        } else if (stage == 0) {
+            bn::sound_items::pew.play();
+            stage = 1;
+            bn::music_items::hon.play(1);
+        } else if (stage < 48) {
+            stage++;
+        } else if (stage == 48) {
+            stage = 49;
+        } else if (stage == 49) {
+            for (int i = 0; i < 3; i++) {
+                logo[i].set_y(lerp(logo[i].y(), 50, bn::fixed(0.15)));
+            }
+        }
+
+        BN_LOG(stage);
+
+        bn::core::update();
+    }
+}
+
 int main()
 {
     // Initialization
@@ -1666,8 +1764,9 @@ int main()
         0}; // current character
     global = &global_instance;
 
-    // show_cutscenes(2);
-    // intro();
+    //intro();
+    mainmenu();
+    show_cutscenes(2);
 
     // Main gameplay loop
     bn::music_items::harp.play(0.5);
