@@ -369,6 +369,11 @@ int linear_gameplay()
             exit_door = n;
             current_room.map[i] = 1;
         }
+        else if (current_room.map[i] == -8) {
+            bn::sprite_ptr n = bn::sprite_items::projectiles.create_sprite(resolve_x(i), resolve_y(i), 4);
+            n.put_below();
+            sprites_v.push_back(n);
+        }
         // Everything else
         else if (current_room.map[i] > 0)
         {
@@ -732,13 +737,15 @@ int linear_gameplay()
             // Handle bullet
             if (bullet.visible())
             {
+
+
                 if (global->chari_offset == LUNA)
                 {
                     bn::fixed proj_x = bn::degrees_cos(bullet.rotation_angle()) * 4;
                     bn::fixed proj_y = -bn::degrees_sin(bullet.rotation_angle()) * 4;
                     int spot = decode((bullet.x() + proj_x).integer(), (bullet.y() + proj_y).integer());
 
-                    if (current_room.map[spot] == 1)
+                    if (current_room.map[spot] == 1 || current_room.map[spot] == -8)
                     {
                         for (int i = 0; i < sprites_b.size(); i++)
                         {
@@ -772,7 +779,7 @@ int linear_gameplay()
                 else if (global->chari_offset == XYLIA)
                 {
                     int spot = decode(bullet.x().integer(), bullet.y().integer());
-                    if (current_room.map[spot] > 0)
+                    if (current_room.map[spot] > 0 || current_room.map[spot] == -8)
                     {
                         bn::sound_items::pew_die.play();
                         bullet.set_visible(false);
@@ -908,6 +915,10 @@ int linear_gameplay()
                 if (current_room.map[decode(pros_x, pros_y)] == -1 && dead != 1)
                 {
                     chari_sound(global->chari_offset, 0);
+                    dead = 1;
+                } else if (current_room.map[decode(pros_x, pros_y)] == -8 && dead != 1) {
+                    chari_sound(global->chari_offset, 0);
+                    bn::sound_items::pew_die.play();
                     dead = 1;
                 }
 
@@ -1948,11 +1959,12 @@ int main()
         0}; // current character
     global = &global_instance;
 
-    intro();
-    mainmenu();
+    //intro();
+    //mainmenu();
+    global->current_level = 14;
 
     // CHAPTER ONE
-    show_cutscenes(2);
+    //show_cutscenes(2);
     bn::music_items::harp.play(0.5);
     while (global->current_level < 7)
     {
@@ -1964,9 +1976,21 @@ int main()
     }
 
     // CHAPTER TWO
-    show_cutscenes(3);
+    //show_cutscenes(3);
     bn::music_items::harp.play(0.5);
     while (global->current_level < 14)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    if (bn::music::playing())
+    {
+        bn::music::stop();
+    }
+
+    // CHAPTER THREE
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 15)
     {
         bn::sound_items::alert.play(0.5);
         global->current_level += linear_gameplay();
