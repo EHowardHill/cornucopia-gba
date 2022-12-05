@@ -62,6 +62,11 @@
 #include "bn_sprite_items_cutscene09.h"
 #include "bn_sprite_items_cutscene10.h"
 #include "bn_sprite_items_cutscene11.h"
+#include "bn_sprite_items_cutscene12.h"
+#include "bn_sprite_items_cutscene13.h"
+#include "bn_sprite_items_cutscene14.h"
+#include "bn_sprite_items_cutscene15.h"
+#include "bn_sprite_items_cutscene16.h"
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
@@ -335,10 +340,12 @@ int linear_gameplay()
         else if (current_room.map[i] == -2)
         {
             sprites_b.push_back(Barrel(resolve_x(i), resolve_y(i), &current_room));
+            current_room.map[i] = 1;
         }
         else if (current_room.map[i] == -3)
         {
             sprites_b.push_back(Barrel(resolve_x(i), resolve_y(i), &current_room, 1));
+            current_room.map[i] = 1;
         }
         // Special items
         else if (current_room.map[i] == -5)
@@ -873,11 +880,16 @@ int linear_gameplay()
 
                     global->chari_offset = (global->chari_offset + XYLIA) % 39;
 
-                    if (global->current_level < 7 && global->chari_offset > LUNA) {
+                    if (global->current_level < 7 && global->chari_offset > LUNA)
+                    {
                         global->chari_offset = LUNA;
-                    } else if (global->current_level < 14 && global->chari_offset > XYLIA) {
+                    }
+                    else if (global->current_level < 14 && global->chari_offset > XYLIA)
+                    {
                         global->chari_offset = LUNA;
-                    } else if (global->chari_offset > JASPER) {
+                    }
+                    else if (global->chari_offset > JASPER)
+                    {
                         global->chari_offset = LUNA;
                     }
 
@@ -1406,7 +1418,9 @@ int show_cutscenes(int scene)
     int maxframes = 30;
     int pos = 0;
     int cutscene = 1;
+    int window_y = 120;
     bool loaded = false;
+    bool primed = false;
     char color = 0;
     bn::vector<bn::sprite_ptr, 6> tiles;
     bn::vector<bn::sprite_ptr, 35> text_sprites1;
@@ -1417,6 +1431,12 @@ int show_cutscenes(int scene)
     // Background stuff
     bn::regular_bg_ptr bg_space = bn::regular_bg_items::bg_space.create_bg(0, 0);
     bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
+
+    // Entrance / exit window
+    bn::rect_window external_window = bn::rect_window::external();
+    external_window.set_show_bg(bg_space, false);
+    external_window.set_show_sprites(false);
+    external_window.set_boundaries(-80, -120, 80, window_y);
 
     while (true)
     {
@@ -1508,6 +1528,36 @@ int show_cutscenes(int scene)
                     push_tile(cutscene11);
                     break;
                 }
+                case 12:
+                {
+                    maxframes = 18;
+                    push_tile(cutscene12);
+                    break;
+                }
+                case 13:
+                {
+                    maxframes = 27;
+                    push_tile(cutscene13);
+                    break;
+                }
+                case 14:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene14);
+                    break;
+                }
+                case 15:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene15);
+                    break;
+                }
+                case 16:
+                {
+                    maxframes = 6;
+                    push_tile(cutscene16);
+                    break;
+                }
                 default:
                 {
                     maxframes = 30;
@@ -1515,6 +1565,14 @@ int show_cutscenes(int scene)
                     break;
                 }
                 }
+            }
+        }
+
+        if (!primed) {
+            primed = true;
+            for (int i = 0; i < 6; i++) {
+                tiles.at(i).set_visible(false);
+                frame = -1;
             }
         }
 
@@ -1584,6 +1642,13 @@ int show_cutscenes(int scene)
         // 1:1 loop
         for (int n = 0; n < 6; n++)
         {
+            // Handle window
+            if (window_y > -80)
+            {
+                window_y -= 10;
+                external_window.set_boundaries(-80, -120, window_y, 120);
+            }
+
             if (bn::keypad::a_pressed())
             {
                 button.set_x(button.x() - 1);
@@ -1691,6 +1756,36 @@ int show_cutscenes(int scene)
                 else if (strcmp(sent1, "S11") == 0)
                 {
                     cutscene = 11;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S12") == 0)
+                {
+                    cutscene = 12;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S13") == 0)
+                {
+                    cutscene = 13;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S14") == 0)
+                {
+                    cutscene = 14;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S15") == 0)
+                {
+                    cutscene = 15;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S16") == 0)
+                {
+                    cutscene = 16;
                     frame = 0;
                     pos++;
                 }
@@ -1855,22 +1950,35 @@ int main()
 
     intro();
     mainmenu();
-    show_cutscenes(2);
 
-    // Main gameplay loop
+    // CHAPTER ONE
+    show_cutscenes(2);
     bn::music_items::harp.play(0.5);
     while (global->current_level < 7)
     {
         bn::sound_items::alert.play(0.5);
         global->current_level += linear_gameplay();
     }
-
-    // Fallback so it doesn't up and crash
     if (bn::music::playing()) {
         bn::music::stop();
     }
+
+    // CHAPTER TWO
+    show_cutscenes(3);
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 14)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    if (bn::music::playing())
+    {
+        bn::music::stop();
+    }
+
+    // Fallback so it doesn't up and crash
     bn::regular_bg_ptr bg_message = bn::regular_bg_items::bg_message.create_bg(0, 0);
-    bn::music_items::anata.play();
+    bn::music_items::anata.play(0.5);
     while (true)
     {
         bn::core::update();

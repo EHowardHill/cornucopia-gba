@@ -1,4 +1,4 @@
-/* 
+/*
 
     strcmp license:
 
@@ -40,6 +40,14 @@ const char d_intro_01[][32] = {
     "Escaping won't be easy,",
     "but I'm sure I can find a way",
     "using those crates.",
+    "$"};
+
+const char d_intro_02[][32] = {
+    "FEATURE UNLOCKED:",
+    "You can now play as Xylia!",
+    "Press either trigger to swap",
+    "characters and use the B button",
+    "to use their unique ability.",
     "$"};
 
 const char d_journal01[][81] = {
@@ -96,7 +104,33 @@ const char d_journal01[][81] = {
     "0I guess it's, uh.. It's REALLY     time to check on the others.",
     " $"};
 
-void const *resolve_dialogue(int requested_dialogue, int position = 0)
+const char d_journal02[][81] = {
+    " S12",
+    "0Xylia!! Are you okay??",
+    "1Luna. Guess what I figured out.",
+    " S13",
+    "0What is it?",
+    " S14",
+    "1That Jasper guy?                   He doesn't work for AAA Security.",
+    "1He's a fraud, and I think he's     behind the gravity outage.",
+    "1I hate zero gravity. HAAAATEEE it.",
+    " S15",
+    "0Yeah, me too. You want me to braid your hair so it isn't all over?",
+    " S14",
+    "1No, I want it down so it can get   everywhere and I can continue to",
+    "1stay angry about it.               Jasper is going to pay.",
+    "0Oh dear..",
+    "1He claims that he's off to fix the gravity with that little.. er..",
+    "1Metronome robot of his, but he's   already lied to us once.",
+    "1Luna, are you aware of how dubious this sounds?",
+    " S15",
+    "0Yeah, yeah I am.",
+    " S16",
+    "1(Dangit, they woulda been so cute)",
+    " $"};
+
+void const *
+resolve_dialogue(int requested_dialogue, int position = 0)
 {
     switch (requested_dialogue)
     {
@@ -108,6 +142,16 @@ void const *resolve_dialogue(int requested_dialogue, int position = 0)
     case 2:
     {
         return &d_journal01[position];
+        break;
+    }
+    case 3:
+    {
+        return &d_journal02[position];
+        break;
+    }
+    case 4:
+    {
+        return &d_intro_02[position];
         break;
     }
     default:
