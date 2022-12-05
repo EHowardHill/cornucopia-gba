@@ -356,11 +356,53 @@ public:
         }
 
         // Luna and Xylia set 2
-        case 114:
+        case 14:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_scanline;
+            break;
+        }
+        case 15:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_bridge;
+            break;
+        }
+        case 16:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_funky;
+            break;
+        }
+        case 17:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_squiggle;
+            break;
+        }
+        case 18:
         {
             start_x = encode_x(7);
             start_y = encode_y(7);
             resolve_level = l_messy;
+            break;
+        }
+        case 19:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_plinko;
+            break;
+        }
+        case 20:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_mystery;
             break;
         }
 

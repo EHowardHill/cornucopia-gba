@@ -369,7 +369,8 @@ int linear_gameplay()
             exit_door = n;
             current_room.map[i] = 1;
         }
-        else if (current_room.map[i] == -8) {
+        else if (current_room.map[i] == -8)
+        {
             bn::sprite_ptr n = bn::sprite_items::projectiles.create_sprite(resolve_x(i), resolve_y(i), 4);
             n.put_below();
             sprites_v.push_back(n);
@@ -738,7 +739,6 @@ int linear_gameplay()
             if (bullet.visible())
             {
 
-
                 if (global->chari_offset == LUNA)
                 {
                     bn::fixed proj_x = bn::degrees_cos(bullet.rotation_angle()) * 4;
@@ -916,7 +916,9 @@ int linear_gameplay()
                 {
                     chari_sound(global->chari_offset, 0);
                     dead = 1;
-                } else if (current_room.map[decode(pros_x, pros_y)] == -8 && dead != 1) {
+                }
+                else if (current_room.map[decode(pros_x, pros_y)] == -8 && dead != 1)
+                {
                     chari_sound(global->chari_offset, 0);
                     bn::sound_items::pew_die.play();
                     dead = 1;
@@ -1579,9 +1581,11 @@ int show_cutscenes(int scene)
             }
         }
 
-        if (!primed) {
+        if (!primed)
+        {
             primed = true;
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 6; i++)
+            {
                 tiles.at(i).set_visible(false);
                 frame = -1;
             }
@@ -1959,24 +1963,25 @@ int main()
         0}; // current character
     global = &global_instance;
 
-    //intro();
-    //mainmenu();
+    // intro();
+    // mainmenu();
     global->current_level = 14;
 
     // CHAPTER ONE
-    //show_cutscenes(2);
+    // show_cutscenes(2);
     bn::music_items::harp.play(0.5);
     while (global->current_level < 7)
     {
         bn::sound_items::alert.play(0.5);
         global->current_level += linear_gameplay();
     }
-    if (bn::music::playing()) {
+    if (bn::music::playing())
+    {
         bn::music::stop();
     }
 
     // CHAPTER TWO
-    //show_cutscenes(3);
+    // show_cutscenes(3);
     bn::music_items::harp.play(0.5);
     while (global->current_level < 14)
     {
@@ -1990,7 +1995,7 @@ int main()
 
     // CHAPTER THREE
     bn::music_items::harp.play(0.5);
-    while (global->current_level < 15)
+    while (global->current_level < 21)
     {
         bn::sound_items::alert.play(0.5);
         global->current_level += linear_gameplay();
