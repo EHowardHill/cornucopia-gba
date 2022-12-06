@@ -112,35 +112,34 @@ XYLIA
 Step away from the controls, Jasper!
 
 JASPER
-Wait!! We've almost got the gravity back!
+Hold on! We've almost got the gravity back!
 
 LUNA
-Xylia, I'm the one who's paid to do this.
 Jasper, stand down, or I'll be forced to use my stun ray.
 
 JASPER
-I promise this isn't my fault!!
+Wait.. Do you think this is MY fault?
 
 Xylia sighs, takes the stun gun from Luna and shoots Jasper with it. He falls over, and sparks fly from the machine.
 
 LUNA
-What was that for??
+Xylia!?
 
 XYLIA
-Admit it, you were bluffing. You weren't going to fire that stun gun.
+Oh, please. You weren't going to fire that stun gun.
 
 LUNA
-Ugh... I might have!
+...I might have!
 
 KAM
 (On the side of the computer)
-Well, you've fried the computer for this wing. Now we REALLY won't get electricity back.
+Good going, numbskulls. You've damaged the computer even more.
 
 LUNA
-So who ARE you two, really?
+So, if you're not with us.. who ARE you two?
 
 KAM
-Stowaways, but we're not malicious. We didn't do this. What reason would we have?
+Stowaways, but we're not malicious. Why would we turn off the gravity?
 
 XYLIA
 I don't know - you tell me.
@@ -151,19 +150,16 @@ JASPER
 Xylia shoots him again with the stun gun.
 
 LUNA
-What was that for??
-
-XYLIA
-I don't know, it just felt right.
-
-LUNA
 (Takes gun)
 Gimme that.
-Xylia, let's look around a little more.
 KAM, do you think you can try to get the gravity back on?
 
 KAM
-I guess I can try, but electronics don't tend to work after you shoot them.
+Electronics don't tend to work after you shoot them.
+Why don't you two look for some replacement parts?
+
+LUNA
+Got it.
 
 > SCENE 4 <
 
@@ -181,7 +177,7 @@ Is that the species with the really bad poetry?
 
 VEGGINIAN
 (From in the pot)
-No, those are the humans.
+No, those are humans.
 
 XYLIA
 Look, do you want us to save you or not?
@@ -218,13 +214,7 @@ Well hurry, then! Harumph.
 They finally get back to KAM and Jasper. The gravity gets turned back on.
 
 JASPER
-Finally!
-
-LUNA
-Oh, thank you so much!
-
-JASPER
-KAM and I finally managed to override the gravity controls for this side of the ship...
+Looks like the installation was a success! Gravity is back.
 (Gestures to Xylia, smirks)
 Despite your best efforts.
 
@@ -232,49 +222,46 @@ XYLIA
 (Huffs)
 How was *I* supposed to know Vegons were on board?
 
-LUNA
-Jasper, KAM, what do we need to do to get the rest of the ship back online?
-
 JASPER
 We just need to get to the other two control panels.
+
+LUNA
+We'll escort you. The ship is full of Vegons.
+
+XYLIA
+Do we have to?
 
 > SCENE 7 <
 
 The three of them finally get to the panel.
 
 JASPER
-This is going to sound super selfish, but I'm sort of glad the gravity went out.
-
-LUNA
-How come?
-
-JASPER
-I mean, space shuffleboard is cool and all, but when stuff goes wrong? I live for this kind of stuff.
+Am I crazy for thinking this is kind of fun?
 
 XYLIA
-Are you a stowaway because you like the adventure or because you're poor?
+Tell me, are you stowing away for the adventure or because you're poor?
 
 JASPER
 Both.
 
 XYLIA
-That sounds amazing. No image to keep up, no one telling you what to do.
+You know..
+
+LUNA
+Be nice, Xylia.
+
+XYLIA
+That sounds nice. No image to keep up, no one telling you what to do.
 
 JASPER
-That's nice, but having trouble finding something to eat? Not so much.
-
-KAM
-To you rich people who wish they could be poor, my offer is simple.
-You want to be poor. I want monster truck wheels.
-
-JASPER
-Yeah, I grew up in the space circus.
+The freedom is nice. Being hungry all the time is not.
+I grew up in the space circus.
 
 LUNA
 You did?? I wonder if Xylia and I saw you at some point. What did you do?
 
 JASPER
-I did the lights.
+I ran the lightboard and did repairs.
 
 XYLIA
 Last time I went to the circus, the flashing lights made me queasy.
