@@ -347,6 +347,8 @@ public:
             resolve_level = l_grid;
             break;
         }
+
+        // Luna and Xylia set 2
         case 13:
         {
             start_x = encode_x(1);
@@ -354,8 +356,6 @@ public:
             resolve_level = l_gallery;
             break;
         }
-
-        // Luna and Xylia set 2
         case 14:
         {
             start_x = encode_x(7);
@@ -391,6 +391,8 @@ public:
             resolve_level = l_messy;
             break;
         }
+
+        // Chapter Four be like
         case 19:
         {
             start_x = encode_x(7);

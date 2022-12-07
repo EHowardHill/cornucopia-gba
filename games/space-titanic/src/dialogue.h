@@ -77,10 +77,9 @@ const char d_journal01[][81] = {
     " S02",
     "0Oh.. hehe.",
     " S00",
-    "1Didn't you say that Jasper wanted  to go out to get a snack",
-    "1before the coffee shop closed?",
+    "1Didn't you say that Jasper wanted  to go out to get a snack?",
     " S02",
-    "0Oh, you go ahead and have fun, I   have to catch up on my daily report.",
+    "0Oh, you two go ahead and have fun, I have to catch up on my daily report.",
     " S05",
     "1Alright, then.",
     "1I can hear you giggling from all   the way over here.",
@@ -114,19 +113,54 @@ const char d_journal02[][81] = {
     "1That Jasper guy?                   He doesn't work for AAA Security.",
     "1He's a fraud, and I think he's     behind the gravity outage.",
     "1I hate zero gravity. HAAAATEEE it.",
+    "1He claims that he's off to fix the gravity with that robot of his.",
+    "1But he's already lied to us once.  Luna, tell me I'm not crazy.",
     " S15",
-    "0Yeah, me too. You want me to braid your hair so it isn't all over?",
-    " S14",
-    "1No, I want it down so it can get   everywhere and I can continue to",
-    "1stay angry about it.               Jasper is going to pay.",
-    "0Oh dear..",
-    "1He claims that he's off to fix the gravity with that little.. er..",
-    "1Metronome robot of his, but he's   already lied to us once.",
-    "1Luna, are you aware of how dubious this sounds?",
-    " S15",
-    "0Yeah, yeah I am.",
+    "0No, no you're not crazy.",
     " S16",
     "1(Dangit, they woulda been so cute)",
+    " $"};
+
+const char d_journal03[][81] = {
+    " S17",
+    "1Step away from the controls,       Jasper!",
+    " S18",
+    "2Uh.. KAM and I almost got the      gravity back.",
+    " S17",
+    "0Jasper, stand down, or I'll be     forced to use my stun ray.",
+    " S18",
+    "2Wait.. Do you think this is MY     fault?",
+    " S19",
+    " M_KILL",
+    " ...",
+    "0Xylia!?",
+    " S21",
+    "1Oh, please. You weren't going to   fire that stun gun.",
+    " S20",
+    "0...I might have!",
+    " S22",
+    "3Good going, numbskulls. You've     damaged the computer even more.",
+    " S23",
+    " M_ANATA",
+    "0So, if you're not with us.. who AREyou two?",
+    " S22",
+    "3Stowaways, but we're not malicious.Why would WE turn off the gravity?",
+    " S24",
+    "1I don't know - you tell me.",
+    " S25",
+    "2...Ow, my head...",
+    " S26",
+    " M_KILL",
+    "0Xylia! Cut that out!",
+    " S21",
+    "1Sorry, I couldn't help it.",
+    " S23",
+    "0KAM, do you think you can try to   get the gravity back on?",
+    " S22",
+    "3Electronics don't tend to work     after you shoot them.",
+    "3Why don't you two look for some    replacement parts?",
+    " S23",
+    "0Sure thing. We'll.. uh.. be back.",
     " $"};
 
 void const *
@@ -152,6 +186,11 @@ resolve_dialogue(int requested_dialogue, int position = 0)
     case 4:
     {
         return &d_intro_02[position];
+        break;
+    }
+    case 5:
+    {
+        return &d_journal03[position];
         break;
     }
     default:

@@ -42,6 +42,8 @@
 #include "bn_sprite_items_world.h"
 #include "bn_sprite_items_items.h"
 #include "bn_sprite_items_buttons.h"
+#include "bn_sprite_items_buttons_green.h"
+#include "bn_sprite_items_buttons_red.h"
 #include "bn_sprite_items_projectiles.h"
 #include "bn_sprite_items_logo.h"
 #include "bn_regular_bg_items_bg_carpet.h"
@@ -897,11 +899,11 @@ int linear_gameplay()
 
                     global->chari_offset = (global->chari_offset + XYLIA) % 39;
 
-                    if (global->current_level < 7 && global->chari_offset > LUNA)
+                    if (global->current_level < 6 && global->chari_offset > LUNA)
                     {
                         global->chari_offset = LUNA;
                     }
-                    else if (global->current_level < 14 && global->chari_offset > XYLIA)
+                    else if (global->current_level < 12 && global->chari_offset > XYLIA)
                     {
                         global->chari_offset = LUNA;
                     }
@@ -1581,6 +1583,67 @@ int show_cutscenes(int scene)
                     push_tile(cutscene16);
                     break;
                 }
+                case 17:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene17);
+                    break;
+                }
+                case 18:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene18);
+                    break;
+                }
+                case 19:
+                {
+                    maxframes = 51;
+                    push_tile(cutscene19);
+                    break;
+                }
+                case 20:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene20);
+                    break;
+                }
+                case 21:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene21);
+                    break;
+                    //
+                }
+                case 22:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene22);
+                    break;
+                }
+                case 23:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene23);
+                    break;
+                }
+                case 24:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene24);
+                    break;
+                }
+                case 25:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene25);
+                    break;
+                }
+                case 26:
+                {
+                    maxframes = 16;
+                    push_tile(cutscene26);
+                    break;
+                }
                 default:
                 {
                     maxframes = 30;
@@ -1814,10 +1877,78 @@ int show_cutscenes(int scene)
                     frame = 0;
                     pos++;
                 }
+                else if (strcmp(sent1, "S17") == 0)
+                {
+                    cutscene = 17;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S18") == 0)
+                {
+                    cutscene = 18;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S19") == 0)
+                {
+                    bn::sound_items::pew_long.play();
+                    cutscene = 19;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S20") == 0)
+                {
+                    cutscene = 20;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S21") == 0)
+                {
+                    cutscene = 21;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S22") == 0)
+                {
+                    cutscene = 22;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S23") == 0)
+                {
+                    cutscene = 23;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S24") == 0)
+                {
+                    cutscene = 24;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S25") == 0)
+                {
+                    cutscene = 25;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S26") == 0)
+                {
+                    bn::sound_items::pew.play();
+                    cutscene = 26;
+                    frame = 0;
+                    pos++;
+                }
                 else if (strcmp(sent1, "M_KILL") == 0)
                 {
                     if (bn::music::playing())
                         bn::music::stop();
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "M_ANATA") == 0)
+                {
+                    bn::music_items::anata.play(0.5);
                     frame = 0;
                     pos++;
                 }
@@ -1831,6 +1962,14 @@ int show_cutscenes(int scene)
                         {
                             text_sprites1.at(i).set_palette(bn::sprite_items::buttons.palette_item());
                         }
+                        else if (color == '2')
+                        {
+                            text_sprites1.at(i).set_palette(bn::sprite_items::buttons_green.palette_item());
+                        }
+                        else if (color == '3')
+                        {
+                            text_sprites1.at(i).set_palette(bn::sprite_items::buttons_red.palette_item());
+                        }
                         text_sprites1.at(i).set_visible(false);
                     }
                     for (int i = 0; i < text_sprites2.size(); i++)
@@ -1838,6 +1977,14 @@ int show_cutscenes(int scene)
                         if (color == '1')
                         {
                             text_sprites2.at(i).set_palette(bn::sprite_items::buttons.palette_item());
+                        }
+                        else if (color == '2')
+                        {
+                            text_sprites2.at(i).set_palette(bn::sprite_items::buttons_green.palette_item());
+                        }
+                        else if (color == '3')
+                        {
+                            text_sprites2.at(i).set_palette(bn::sprite_items::buttons_red.palette_item());
                         }
                         text_sprites2.at(i).set_visible(false);
                     }
@@ -1975,37 +2122,52 @@ int main()
 
     // intro();
     // mainmenu();
-    global->current_level = 14;
 
-    // CHAPTER ONE
-    // show_cutscenes(2);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 7)
+    if (1 == 1)
     {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    if (bn::music::playing())
-    {
-        bn::music::stop();
-    }
+        // CHAPTER ONE
+        show_cutscenes(2);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 6)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        if (bn::music::playing())
+        {
+            bn::music::stop();
+        }
 
-    // CHAPTER TWO
-    // show_cutscenes(3);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 14)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    if (bn::music::playing())
-    {
-        bn::music::stop();
+        // CHAPTER TWO
+        show_cutscenes(3);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 12)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        if (bn::music::playing())
+        {
+            bn::music::stop();
+        }
     }
 
     // CHAPTER THREE
+    show_cutscenes(5);
     bn::music_items::harp.play(0.5);
-    while (global->current_level < 21)
+    while (global->current_level < 18)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    if (bn::music::playing())
+    {
+        bn::music::stop();
+    }
+
+    // CHAPTER FOUR
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 24)
     {
         bn::sound_items::alert.play(0.5);
         global->current_level += linear_gameplay();
