@@ -67,6 +67,16 @@
 #include "bn_sprite_items_cutscene14.h"
 #include "bn_sprite_items_cutscene15.h"
 #include "bn_sprite_items_cutscene16.h"
+#include "bn_sprite_items_cutscene17.h"
+#include "bn_sprite_items_cutscene18.h"
+#include "bn_sprite_items_cutscene19.h"
+#include "bn_sprite_items_cutscene20.h"
+#include "bn_sprite_items_cutscene21.h"
+#include "bn_sprite_items_cutscene22.h"
+#include "bn_sprite_items_cutscene23.h"
+#include "bn_sprite_items_cutscene24.h"
+#include "bn_sprite_items_cutscene25.h"
+#include "bn_sprite_items_cutscene26.h"
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
