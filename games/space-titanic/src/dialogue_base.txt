@@ -1,0 +1,264 @@
+english d_messages[][32]
+    Push wooden crate
+    Break rotten crate
+
+french d_messages[][32]
+    Pousses la caisse en bois
+    Casser la caisse pourrie
+
+---
+
+english d_intro_01[][32]
+    Okay.. Gravity is out.
+    Escaping won't be easy,
+    but I'm sure I can find a way
+    using those crates.
+
+french d_intro_01[][32]
+    Okay.. la gravité a disparu.
+    S'échapper ne sera pas facile,
+    mais je trouverai un moyen de
+    sortir en utilisant ces caisses.
+
+---
+
+english d_intro_02[][32]
+    FEATURE UNLOCKED:
+    You can now play as Xylia!
+    Press either trigger to swap
+    characters and use the B button
+    to use their unique ability.
+
+french d_intro_02[][32]
+    FONCTION DÉVERROUILLÉE:
+    Tu peux incarner Xylia !
+    Appuies sur R ou L pour
+    permuter caractères et utilises
+    le bouton B utiliser leur
+    capacité unique.
+
+---
+
+english d_journal01[][81]
+	S01
+	LUNA	Dear diary, first day as a securityguard is finally over!
+	LUNA	AAA Security put me on this cruise-liner called the 'Cornucopia'.
+	LUNA	All the passengers are Vegginians, and they are SO chill!
+	S02
+	LUNA	It would be boring, but I convincedXylia to come along.
+	LUNA	Her parents bought her a ticket so we're sharing a cabin.
+	LUNA	She, uh.. doesn't like it when her parents buy her stuff,
+	S03
+	LUNA	but she's been quiet about it.
+	S02
+	LUNA	We spent most of the day playing   shuffleboard with the Vegginians
+	LUNA	and my coworker, Jasper.           Jasper seems cool.
+	LUNA	Does he think Xylia is cute?       Only time will tell.
+	S04
+	LUNA	He made this little robot named    KAM, I think. It's pretty smart.
+	LUNA	I have no idea why he's in securityif  he likes making robots so much,
+	LUNA	but it's whatever.                 So excited for tomorrow!
+	S03
+	XYLIA	Hope you're not writing anything inthere you want to keep secret.
+	S00
+	LUNA	How come?
+	XYLIA	You mumbled the whole thing out    loud as you were writing.
+	S02
+	LUNA	Oh.. hehe.
+	S00
+	XYLIA	Didn't you say that Jasper wanted  to go out to get a snack?
+	S02
+	LUNA	Oh, you two go ahead and have fun, I have to catch up on my daily report.
+	S05
+	XYLIA	Alright, then.
+	XYLIA	I can hear you giggling from all   the way over here.
+	S06
+	LUNA	I'm not, I'm not.
+	XYLIA	Luna, I don't believe you.
+	S07
+	LUNA	...
+	LUNA	....
+	LUNA	...Alright, now we wait.
+	S08
+	M_KILL
+    ...uggggggh
+	LUNA	How long has it been? It is time tosee how Jasper and Xylia are doing?
+	S09
+    Ehh.. I'm sure they're fine.
+	S10
+    ...
+	S11
+	LUNA	What the-                          Who turned the gravity off?
+	LUNA	I guess it's, uh.. It's REALLY     time to check on the others.
+
+french d_journal01[][81]
+	S01
+	LUNA	Cher journal, le premier jour en tant que gardienne est enfin terminé !
+	LUNA	AAA Security m'a mis sur un spaceship appelé "Starship Cornucopia".
+	LUNA	Tous les passagers sont Végéginiens, et ils sont SI tranquilles !
+	S02
+	LUNA	Ce serait ennuyeux, mais j'ai convaincu Xylia de venir.
+	LUNA	Ses parents lui ont acheté un billet, alors nous partageons une cabine.
+	LUNA	Elle n'aime pas que ses parents lui achètent des affaires,
+	S03
+	LUNA	mais n'en a pas encore parlé.
+	S02
+	LUNA	Nous-autres avons passé la majeure partie de la journée à jouer au
+	LUNA	jeu de palets avec les Végéginiens et mon collègue, Jasper.
+	LUNA	Aime-t-il Xylia ?                  Je vais espérer et voir.
+	S04
+	LUNA	Il a fait ce petit robot nommé KAM, je pense. Ç'est intelligent beaucoup.
+	LUNA	Je connais pas pourquoi il est     gardien s'il aime tant fabriquer des robots,
+	LUNA	mais ce sont pas mes affaires. J'suis excité pour demain!
+	S03
+	XYLIA	J'espère que tu y écris pas rien que tu veuilles garder secret.
+	S00
+	LUNA	Comment ça ?
+	XYLIA	Tu as tout marmonné à haute voix.
+	S02
+	LUNA	Oh.. héhé.
+	S00
+	XYLIA	Tu pas dit que Jasper voulait sortir pour prendre un snack ?
+	S02
+	LUNA	Oh, vous-autres deux allez-y et amuse-toi. Je dois rattraper mon rapport quotidien.
+	S05
+	XYLIA	Alright.
+	XYLIA	Je t'entends rire de tout le chemin par ici.
+	S06
+	LUNA	J'suis pas, j'suis pas.
+	XYLIA	Luna, je te crois pas.
+	S07
+	LUNA	...
+	LUNA	....
+	LUNA	...Alright, il est temps d'espérer.
+	S08
+	M_KILL
+	LUNA	...uggggggh
+	LUNA	Combien de temps cela a-t-il duré? Est-il temps de voir comment vont Jasper et Xylia ?
+	S09
+	LUNA	Ehh.. Je suis sûr qu'ils vont bien
+	S10
+	LUNA	...
+	S11
+	LUNA	Que-                               Qui a désactivé la gravité
+	LUNA	Je suppose qu'il est définitivement temps de vérifier les autres.
+
+---
+
+english d_journal02[][81]
+	S12
+	LUNA	Xylia!! Are you okay??
+	XYLIA	Luna. Guess what I figured out.
+	S13
+	LUNA	What is it?
+	S14
+	XYLIA	That Jasper guy?                   He doesn't work for AAA Security.
+	XYLIA	He's a fraud, and I think he's     behind the gravity outage.
+	XYLIA	He claims that he's off to fix the gravity with that robot of his.
+	XYLIA	But he's already lied to us once.  Luna, tell me I'm not crazy.
+	S15
+	LUNA	No, no you're not crazy.
+	S16
+	LUNA	(Dangit, they woulda been so cute)
+
+french  d_journal02[][81]
+	S12
+	LUNA	Xylia !! Est-ce que ça va??
+	XYLIA	Luna. Devine ce que j'ai découvert.
+	S13
+	LUNA	Quoi?
+	S14
+	XYLIA	Ce Jaspe ? Il travaille pas pour AAA Security.
+	XYLIA	C'est un imposteur, et je pense qu'il est derrière la panne de gravité.
+	XYLIA	Il prétend qu'il est parti réparer la gravité avec son robot.
+	XYLIA	Mais il nous a déjà menti une fois. Luna, dis-moi que je suis pas un couillon.
+	S15
+	LUNA	Non, non, tu es pas un couillon.
+	S16
+	LUNA	(Tonnere mon chien! Ils auraient été mignons ensemble)
+
+---
+
+english d_journal03[][81]
+	S17
+	XYLIA	Step away from the controls,       Jasper!
+	S18
+	JASPER	Uh.. KAM and I almost got the      gravity back.
+	S17
+	LUNA	Jasper, stand down, or I'll be     forced to use my stun ray.
+	S18
+	JASPER	Wait.. Do you think this is MY     fault?
+	S19
+	M_KILL
+	...
+	LUNA	Xylia!?
+	S21
+	XYLIA	Oh, please. You weren't going to   fire that stun gun.
+	S20
+	LUNA	...I might have!
+	S22
+	KAM	Good going, numbskulls. You've     damaged the computer even more.
+	S23
+	M_ANATA
+	LUNA	So, if you're not with us.. who AREyou two?
+	S22
+	KAM	Stowaways, but we're not malicious.Why would WE turn off the gravity?
+	S24
+	XYLIA	I don't know - you tell me.
+	S25
+	JASPER	...Ow, my head...
+	S26
+	M_KILL
+	LUNA	Xylia! Cut that out!
+	S21
+	XYLIA	Sorry, I couldn't help it.
+	S23
+	LUNA	KAM, do you think you can try to   get the gravity back on?
+	S22
+	KAM	Electronics don't tend to work     after you shoot them.
+	KAM	Why don't you two look for some    replacement parts?
+	S23
+	LUNA	Sure thing. We'll.. uh.. be back.
+
+french d_journal03[][81]
+	S17
+	XYLIA	Éloigne-toi des commandes, Jasper !
+	S18
+	JASPER	Euh.. KAM et moi avons presque fixé la gravité
+	S17
+	LUNA	Jasper, démissionne, ou je serai obligé d'utiliser mon stun ray.
+	S18
+	JASPER	Espères.. pensez-vous que la panne de gravité est de MA faute ?
+	S19
+	M_KILL
+	...
+	LUNA	Xylia!?
+	S21
+	XYLIA	Oh, bon chagrin. Tu allais pas tirer ce stun gun.
+	S20
+	LUNA	...Je pourrais avoir!
+	S22
+	KAM     Bravo les vaut-riens. Vous avez encore plus endommagé l'ordinateur.
+	S23
+	M_ANATA
+	LUNA	Donc, si vous êtes pas les tuteurs... qui êtes-vous ?
+	S22
+	KAM     Des passagers clandestins, mais nous ne sommes pas malveillants. Pourquoi désactiverions-NOUS la gravité ?
+	S24
+	XYLIA	Je sais pas - tu me diras.
+	S25
+	JASPER	...Aïe, ma tête...
+	S26
+	M_KILL
+	LUNA	Xylia ! Arrêt!
+	S21
+	XYLIA	Désolé, je pouvais pas l'aider.
+	S23
+	LUNA	KAM, tu penses que tu peux essayer de rétablir la gravité ?
+	S22
+	KAM     L'électronique ne fonctionne pas souvent après que vous lui ayez tiré dessus.
+	KAM     Pourquoi chercheriez-vous pas des pièces de rechange ?
+	S23
+	LUNA	Pour sûr. Nous allons... euh... revenir.
+
+---

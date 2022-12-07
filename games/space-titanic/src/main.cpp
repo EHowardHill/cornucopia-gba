@@ -2150,19 +2150,19 @@ int main()
         {
             bn::music::stop();
         }
-    }
 
-    // CHAPTER THREE
-    show_cutscenes(5);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 18)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    if (bn::music::playing())
-    {
-        bn::music::stop();
+        // CHAPTER THREE
+        show_cutscenes(5);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 18)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        if (bn::music::playing())
+        {
+            bn::music::stop();
+        }
     }
 
     // CHAPTER FOUR

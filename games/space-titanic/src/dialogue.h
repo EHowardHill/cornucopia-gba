@@ -1,20 +1,20 @@
 /*
+license for Strcmp:
 
-    strcmp license:
-
-    Copyright (C) 1991-2022 Free Software Foundation, Inc.
-    This file is part of the GNU C Library.
-    The GNU C Library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
-    The GNU C Library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-    You should have received a copy of the GNU Lesser General Public
-    License along with the GNU C Library; if not, see
-    <https://www.gnu.org/licenses/>.  */
+Copyright (C) 1991-2022 Free Software Foundation, Inc.
+This file is part of the GNU C Library.
+The GNU C Library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+The GNU C Library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+You should have received a copy of the GNU Lesser General Public
+License along with the GNU C Library; if not, see
+<https://www.gnu.org/licenses/>.
+*/
 
 int strcmp(const char *p1, const char *p2)
 {
@@ -162,6 +162,104 @@ const char d_journal03[][81] = {
     " S23",
     "0Sure thing. We'll.. uh.. be back.",
     " $"};
+
+const char d_journal04[][81] = {
+    "3You're too late, humans! Tonight, we feast on Vegginians!",
+    "0Vegons! I should have known!",
+    "1Is that the species with the really bad poetry?",
+    "2No, those are humans.",
+    "1Look, do you want us to save you or not?",
+    "0Don't be afraid, Vegginians! Help is on the way!",
+    " $"
+}
+
+const char d_journal05[][81] = {
+    "0Col. Green! Are you okay?",
+    "2Absolutely steamed! Clearly, one security guard was not enough. We needed at least four.",
+    "0What are we going to do?",
+    "2Young lady, you are the security guard.",
+    "2You're the only one qualified to handle this situation.",
+    "0Oh... right. Well, we're trying to get the gravity back on.",
+    "2Well, hurry up, then!"
+    " $"
+}
+
+const char d_journal06[][81] = {
+    "2Looks like the installation was a success! Gravity is back.",
+    "2Despite your best efforts.",
+    "1How was I supposed to know Vegons were on board?",
+    "2Now, we just need to get to the other two control panels.",
+    "0No problem. We'll escort you.",
+    "1Do we have to?",
+    " $"
+}
+
+const char d_journal07[][81] = {
+    "2Am I crazy for thinking this is kind of fun?",
+    "0I'll admit, I didn't expect this trip to be so exciting.",
+    "1Tell me, are you stowing away for the adventure or because you're poor?",
+    "2Both.",
+    "1You know..",
+    "0Be nice, Xylia.",
+    "1That sounds nice. No image to keep up, no one telling you what to do.",
+    "2The freedom is nice. Being hungry all the time is not."
+    "2I grew up in the space circus, you know.",
+    "0No way! I wonder if Xylia and I saw you at some point. What did you do?",
+    "2I ran the lightboard and did repairs.",
+    "1Last time I went to the circus, the flashing lights made me queasy. So I guess we're even.",
+    "2Nah. It'd have to happen twice for us to be even.",
+    " $"
+}
+
+const char d_journal08[][81] = {
+    "0So how many of you ARE there?",
+    "3Enough to defeat you three!",
+    "1Stand down, Vegon!",
+    "0Jasper!",
+    "2What? I figured she wasn't going to use it.",
+    "0I really was that time!"
+    " $"
+}
+
+const char d_journal09[][81] = {
+    "0It's over, Vegons! Surrender now, or else!",
+    "3Or else what?",
+    "1C'mon, Luna.",
+    "2You got this!",
+    "3Bad move."
+}
+
+const char d_journal10[][81] = {
+    "1Luna? Are you okay?",
+    "0...Ow.",
+    "2Yeah, that stun beam hurts, huh.",
+    "0..I really sorry, guys. I.. I failed you. I'm not good enough to be a security guard.",
+    "2Oh come on, you've done a great job so far! You just don't like zapping people. But that can be fixed.",
+    "0What do you mean?",
+    "2See that stunned Vegon on the ground? He's not bothering nobody. No one says you can't zap him as he is.",
+    "0That seems cruel.",
+    "2Dude, he was literally right about to eat your clients.",
+    "0...Okay... You can do this, Luna.",
+    "2Uh.. Luna, that's enough.",
+    "1Jasper! You broke sweet, innocent Luna!"
+    "0It's all done, isn't it? The Vegons are in jail, the Vegginians are happy, and I'm getting paid.",
+    "2This is where I hitch a ride on the next spaceship. I'll admit though, I'm gonna miss you guys.",
+    "1Hey.. When can I see you again?",
+    "0This is stupid. Why don't we three sail off together? We're all adults here, we can do what we want.",
+    "1What about your job?",
+    "0What about your lack of one?",
+    "1...Touché.",
+    "2I guess it's settled, then. Off to the next adventure?",
+    "0Yeah!",
+    " $"
+}
+
+const char d_credits[][32] = {
+    "CORNUCOPIA",
+    "Character design by Madelyn Watts",
+    "Kickstarter backers",
+    " $"
+}
 
 void const *
 resolve_dialogue(int requested_dialogue, int position = 0)
