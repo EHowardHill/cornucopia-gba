@@ -171,8 +171,9 @@ const char d_journal04[][81] = {
     "1Look, do you want us to save you or not?",
     "0Don't be afraid, Vegginians! Help is on the way!",
     " $"
-}
+};
 
+/*
 const char d_journal05[][81] = {
     "0Col. Green! Are you okay?",
     "2Absolutely steamed! Clearly, one security guard was not enough. We needed at least four.",
@@ -253,13 +254,14 @@ const char d_journal10[][81] = {
     "0Yeah!",
     " $"
 }
+*/
 
 const char d_credits[][32] = {
     "CORNUCOPIA",
-    "Character design by Madelyn Watts",
+    "Character design: Madelyn Watts",
     "Kickstarter backers",
     " $"
-}
+};
 
 void const *
 resolve_dialogue(int requested_dialogue, int position = 0)

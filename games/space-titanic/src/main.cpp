@@ -46,6 +46,7 @@
 #include "bn_sprite_items_buttons_red.h"
 #include "bn_sprite_items_projectiles.h"
 #include "bn_sprite_items_logo.h"
+#include "bn_sprite_items_vegons_01.h"
 #include "bn_regular_bg_items_bg_carpet.h"
 #include "bn_regular_bg_items_bg_cinemint.h"
 #include "bn_regular_bg_items_bg_space.h"
@@ -319,6 +320,10 @@ int linear_gameplay()
     bn::fixed bullet_x;
     bn::fixed bullet_y;
 
+    // Boss deets
+    bn::optional<bn::sprite_ptr> boss;
+    bn::optional<bn::sprite_animate_action<4>> boss_action;
+
     // Entrance door
     bn::sprite_ptr entr_door = bn::sprite_items::items.create_sprite(0, 0, 7);
     entr_door.set_horizontal_scale(0.1);
@@ -386,6 +391,14 @@ int linear_gameplay()
             bn::sprite_ptr n = bn::sprite_items::projectiles.create_sprite(resolve_x(i), resolve_y(i), 4);
             n.put_below();
             sprites_v.push_back(n);
+        }
+        else if (current_room.map[i] == -9)
+        {
+            bn::sprite_ptr vegons = bn::sprite_items::vegons_01.create_sprite(resolve_x(i), resolve_y(i), 0);
+            boss = vegons;
+            bn::sprite_animate_action<4> vegons_action = bn::create_sprite_animate_action_forever(
+                boss.value(), 1, bn::sprite_items::vegons_01.tiles_item(), 0, 1, 2, 3);
+            boss_action = vegons_action;
         }
         // Everything else
         else if (current_room.map[i] > 0)
@@ -2123,7 +2136,7 @@ int main()
     // intro();
     // mainmenu();
 
-    if (1 == 1)
+    if (0 == 1)
     {
         // CHAPTER ONE
         show_cutscenes(2);
@@ -2163,19 +2176,22 @@ int main()
         {
             bn::music::stop();
         }
+
+        // CHAPTER FOUR
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 24)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        if (bn::music::playing())
+        {
+            bn::music::stop();
+        }
     }
 
-    // CHAPTER FOUR
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 24)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    if (bn::music::playing())
-    {
-        bn::music::stop();
-    }
+    global->current_level = 19;
+    linear_gameplay();
 
     // Fallback so it doesn't up and crash
     bn::regular_bg_ptr bg_message = bn::regular_bg_items::bg_message.create_bg(0, 0);

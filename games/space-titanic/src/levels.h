@@ -236,6 +236,17 @@ const int l_mystery[135] = {
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1, 1, -6, 1, 1, 1, 1, 1, 1, 1};
 
+const int l_boss01[135] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 0, -9, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, -10, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
 // Custom classes
 class Room
 {
@@ -392,15 +403,24 @@ public:
             break;
         }
 
-        // Chapter Four be like
+        // Boss battle
         case 19:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_boss01;
+            break;
+        }
+
+        // Chapter Four be like
+        case 20:
         {
             start_x = encode_x(7);
             start_y = encode_y(7);
             resolve_level = l_plinko;
             break;
         }
-        case 20:
+        case 21:
         {
             start_x = encode_x(7);
             start_y = encode_y(7);
