@@ -164,27 +164,41 @@ const char d_journal03[][81] = {
     " $"};
 
 const char d_journal04[][81] = {
-    "3You're too late, humans! Tonight, we feast on Vegginians!",
+    " S28",
+    "3You're too late, humans! Tonight,  we feast on Vegginians!",
+    " S17",
     "0Vegons! I should have known!",
-    "1Is that the species with the really bad poetry?",
+    " S27",
+    "1Is that the species with the reallybad poetry?",
+    " S29",
     "2No, those are humans.",
-    "1Look, do you want us to save you or not?",
-    "0Don't be afraid, Vegginians! Help is on the way!",
+    " S27",
+    "1Look, do you want us to save you ornot?",
+    " S17",
+    "0Don't be afraid, Vegginian! Help ison the way!",
+    " $"
+};
+
+const char d_journal05[][81] = {
+    " S30",
+    "0...",
+    "0Mr. Tomato! Are you okay?",
+    " S31",
+    "2Absolutely steamed! Clearly, one   security guard was not enough.",
+    "2We needed at least three.",
+    " S32",
+    "0What are we going to do?",
+    " S31",
+    "2Young lady, you are the security   guard.",
+    "2You're the only one qualified to   handle this situation.",
+    " S32",
+    "0Oh... right. Well, we're trying to get the gravity back on.",
+    " S31",
+    "2Well, hurry up, then!",
     " $"
 };
 
 /*
-const char d_journal05[][81] = {
-    "0Col. Green! Are you okay?",
-    "2Absolutely steamed! Clearly, one security guard was not enough. We needed at least four.",
-    "0What are we going to do?",
-    "2Young lady, you are the security guard.",
-    "2You're the only one qualified to handle this situation.",
-    "0Oh... right. Well, we're trying to get the gravity back on.",
-    "2Well, hurry up, then!"
-    " $"
-}
-
 const char d_journal06[][81] = {
     "2Looks like the installation was a success! Gravity is back.",
     "2Despite your best efforts.",
@@ -291,6 +305,16 @@ resolve_dialogue(int requested_dialogue, int position = 0)
     case 5:
     {
         return &d_journal03[position];
+        break;
+    }
+    case 6:
+    {
+        return &d_journal04[position];
+        break;
+    }
+    case 7:
+    {
+        return &d_journal05[position];
         break;
     }
     default:

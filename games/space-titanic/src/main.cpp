@@ -23,6 +23,7 @@
 #include "bn_cstring.h"
 #include "bn_keypad.h"
 #include "bn_display.h"
+#include "bn_random.h"
 #include "bn_blending.h"
 #include "bn_bg_palettes.h"
 #include "bn_bg_palette_ptr.h"
@@ -38,7 +39,6 @@
 #include "bn_sprite_items_tukatuka.h"
 #include "bn_sprite_items_cinemint.h"
 #include "bn_sprite_items_chari.h"
-#include "bn_sprite_items_ninja.h"
 #include "bn_sprite_items_world.h"
 #include "bn_sprite_items_items.h"
 #include "bn_sprite_items_buttons.h"
@@ -47,6 +47,8 @@
 #include "bn_sprite_items_projectiles.h"
 #include "bn_sprite_items_logo.h"
 #include "bn_sprite_items_vegons_01.h"
+#include "bn_sprite_items_item_pots.h"
+#include "bn_sprite_items_veggies.h"
 #include "bn_regular_bg_items_bg_carpet.h"
 #include "bn_regular_bg_items_bg_cinemint.h"
 #include "bn_regular_bg_items_bg_space.h"
@@ -80,6 +82,12 @@
 #include "bn_sprite_items_cutscene24.h"
 #include "bn_sprite_items_cutscene25.h"
 #include "bn_sprite_items_cutscene26.h"
+#include "bn_sprite_items_cutscene27.h"
+#include "bn_sprite_items_cutscene28.h"
+#include "bn_sprite_items_cutscene29.h"
+#include "bn_sprite_items_cutscene30.h"
+#include "bn_sprite_items_cutscene31.h"
+#include "bn_sprite_items_cutscene32.h"
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
@@ -91,17 +99,35 @@
 
 #define push_tile(q) tiles.push_back(bn::sprite_items::q.create_sprite(-64 + (x * 64), -32 + (y * 64) - 8, (frame * 2) + y + (x * maxframes * 2)));
 
-#define gravity_allow(x) (x == 0 || x == -1 || x == -5)
-#define antigravity_allow(x) (x != 1 || x < -1)
+inline bool gravity_allow(int x)
+{
+    return (x == 0 || x == -1 || x == -5);
+}
 
-#define D_LEFT 1
-#define D_RIGHT 2
-#define D_UP 3
-#define D_DOWN 4
+inline bool antigravity_allow(int x)
+{
+    return (x != 1 || (x < -1 && x != -10));
+}
 
-#define LUNA 0
-#define XYLIA 13
-#define JASPER 26
+inline bn::fixed distance(bn::sprite_ptr sprite1, bn::sprite_ptr sprite2)
+{
+    return bn::abs(bn::abs(sprite1.x() - sprite2.x()) + bn::abs(sprite1.y() - sprite2.y()));
+}
+
+inline void music_stop()
+{
+    if (bn::music::playing())
+        bn::music::stop();
+}
+
+const int D_LEFT = 1;
+const int D_RIGHT = 2;
+const int D_UP = 3;
+const int D_DOWN = 4;
+
+const int LUNA = 0;
+const int XYLIA = 13;
+const int JASPER = 26;
 
 // My custom functions
 #include "./levels.h"
@@ -215,6 +241,26 @@ public:
     }
 };
 
+class Veggie
+{
+public:
+    bn::sprite_ptr sprite = bn::sprite_items::veggies.create_sprite(0, 0, 1);
+    bn::sprite_animate_action<2> sprite_action = bn::create_sprite_animate_action_forever(
+        sprite, 3, bn::sprite_items::veggies.tiles_item(), 0, 1);
+
+    Veggie(int x, int y, int veg)
+    {
+        sprite.set_position(x, y);
+        sprite_action = bn::create_sprite_animate_action_forever(
+            sprite, 3, bn::sprite_items::veggies.tiles_item(), veg * 2, (veg * 2) + 1);
+    }
+
+    void update()
+    {
+        sprite_action.update();
+    }
+};
+
 void chari_sound(int chari, int sound)
 {
     switch (sound)
@@ -313,16 +359,22 @@ int linear_gameplay()
     int bullet_count = 0;
     int text_delay = 0;
     int exit_door_loc = 0;
+    int ticker = -1;
+    int jump = 0;
+    int boss_lives = 12;
+    int death = 0;
+    bool boss_battle = false;
     bool exit_door_init = false;
     bool exit_button_init = false;
-    bn::optional<bn::sprite_ptr> exit_button;
-    bn::optional<bn::sprite_ptr> exit_door;
+    bn::sprite_ptr exit_button = bn::sprite_items::items.create_sprite(resolve_x(-1), resolve_y(-1), 4);
+    bn::sprite_ptr exit_door = bn::sprite_items::items.create_sprite(resolve_x(-1), resolve_y(-1), 6);
+    bn::sprite_ptr boss_ammo = bn::sprite_items::projectiles.create_sprite(0, 0, 6);
+    boss_ammo.set_palette(bn::sprite_items::buttons_green.palette_item());
+    boss_ammo.set_visible(false);
+
     bn::fixed bullet_x;
     bn::fixed bullet_y;
-
-    // Boss deets
-    bn::optional<bn::sprite_ptr> boss;
-    bn::optional<bn::sprite_animate_action<4>> boss_action;
+    bn::random rnd;
 
     // Entrance door
     bn::sprite_ptr entr_door = bn::sprite_items::items.create_sprite(0, 0, 7);
@@ -331,6 +383,7 @@ int linear_gameplay()
     // Set up vectors
     bn::vector<bn::sprite_ptr, 96> sprites_v;
     bn::vector<Barrel, 26> sprites_b;
+    bn::vector<Veggie, 2> veggies;
     bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
     bn::vector<bn::sprite_ptr, 32> text_sprites;
 
@@ -367,11 +420,9 @@ int linear_gameplay()
         // Special items
         else if (current_room.map[i] == -5)
         {
-            bn::sprite_ptr n = bn::sprite_items::items.create_sprite(resolve_x(i), resolve_y(i), 4);
-            exit_button = n;
+            exit_button.set_position(resolve_x(i), resolve_y(i));
+            exit_button.put_below();
             exit_button_init = true;
-            n.put_below();
-            sprites_v.push_back(n);
         }
         else if (current_room.map[i] == -6)
         {
@@ -382,8 +433,7 @@ int linear_gameplay()
         {
             exit_door_loc = i;
             exit_door_init = true;
-            bn::sprite_ptr n = bn::sprite_items::items.create_sprite(resolve_x(i), resolve_y(i), 6);
-            exit_door = n;
+            exit_door.set_position(resolve_x(i), resolve_y(i));
             current_room.map[i] = 1;
         }
         else if (current_room.map[i] == -8)
@@ -394,11 +444,13 @@ int linear_gameplay()
         }
         else if (current_room.map[i] == -9)
         {
-            bn::sprite_ptr vegons = bn::sprite_items::vegons_01.create_sprite(resolve_x(i), resolve_y(i), 0);
-            boss = vegons;
-            bn::sprite_animate_action<4> vegons_action = bn::create_sprite_animate_action_forever(
-                boss.value(), 1, bn::sprite_items::vegons_01.tiles_item(), 0, 1, 2, 3);
-            boss_action = vegons_action;
+            // Vegons
+            exit_button = bn::sprite_items::vegons_01.create_sprite(resolve_x(i), resolve_y(i), 0);
+            exit_button.put_above();
+            exit_door = bn::sprite_items::item_pots.create_sprite(resolve_x(i) + 32, resolve_y(i) + 32, 0);
+            exit_door.put_below();
+            veggies.push_back(Veggie(resolve_x(i) + 32, resolve_y(i) + 32, 2));
+            boss_battle = true;
         }
         // Everything else
         else if (current_room.map[i] > 0)
@@ -412,7 +464,7 @@ int linear_gameplay()
         }
     }
 
-    exit_door.value().set_horizontal_scale(1);
+    exit_door.set_horizontal_scale(1);
 
     // Spiral
     bn::sprite_ptr spiral = bn::sprite_items::projectiles.create_sprite(0, 0, 6);
@@ -438,6 +490,7 @@ int linear_gameplay()
 
     while (true)
     {
+        ticker += 1;
         spiral.set_visible(false);
         aim.set_visible(false);
         if (current_room.intro_monologue == 0)
@@ -631,36 +684,206 @@ int linear_gameplay()
         }
 
         // Handle buttons
-        if (exit_button_init)
+        if (boss_battle)
         {
-            if (
-                (bn::abs(player.x() - exit_button.value().x()) + bn::abs(player.y() - exit_button.value().y()) < 16) ||
-                (bn::abs(bullet.x() - exit_button.value().x()) + bn::abs(bullet.y() - exit_button.value().y()) < 16 && bullet.visible()) ||
-                (current_room.map[decode(exit_button.value().x().integer(), exit_button.value().y().integer())] == 1))
+            bn::blending::set_intensity_alpha(lerp(bn::blending::intensity_alpha(), 0, bn::fixed(0.01)));
+            exit_door = bn::sprite_items::item_pots.create_sprite(exit_door.x(), exit_door.y(), (ticker / 6) % 3);
+            exit_door.put_below();
+            boss_ammo.set_visible(false);
+
+            for (int t = 0; t < veggies.size(); t++)
             {
-                exit_button_init = false;
-                exit_button.value().set_visible(false);
-                bn::sound_items::box_01.play();
-                int leg_x = exit_button.value().x().integer();
-                int leg_y = exit_button.value().y().integer();
-                exit_button.value() = bn::sprite_items::items.create_sprite(leg_x, leg_y, 5);
-                exit_button.value().put_below();
+                veggies.at(t).update();
             }
-        }
-        else if (exit_door_init)
-        {
-            bn::fixed scale = exit_door.value().horizontal_scale() - bn::fixed(0.1);
-            if (scale > 0)
+
+            if (boss_lives > 0)
             {
-                exit_door.value().set_horizontal_scale(scale);
-                exit_door.value().set_x(exit_door.value().x() - 1);
+                if (ticker % 1024 == 512)
+                {
+                    bn::sound_items::shepard.play();
+                }
+                else if (ticker % 1024 == 640)
+                {
+                    bn::sound_items::pew.play();
+                }
+                else if (ticker % 1024 == 0)
+                {
+                    bn::sound_items::rufus_02.play();
+                }
+
+                switch ((ticker / 256) % 4)
+                {
+                case 1:
+                {
+                    exit_button.set_blending_enabled(true);
+                    if (jump == 0)
+                    {
+                        if (exit_button.horizontal_scale() < 2)
+                        {
+                            bn::blending::set_transparency_alpha(lerp(bn::blending::transparency_alpha(), 0, bn::fixed(0.05)));
+                            exit_button.set_scale(exit_button.horizontal_scale() + bn::fixed(0.05), exit_button.horizontal_scale() + bn::fixed(0.05));
+                        }
+                        else
+                        {
+                            jump = 1;
+                            bn::sound_items::crunch.play();
+                        }
+                    }
+                    else if (jump == 1)
+                    {
+                        bool in = true;
+                        int spot = 0;
+                        do
+                        {
+                            spot = rnd.get_int() % 135;
+                            if (current_room.map[spot] == 0)
+                            {
+                                exit_button.set_position(resolve_x(spot), resolve_y(spot));
+                                in = false;
+                            }
+                        } while (in);
+                        current_room.map[spot] = 1;
+                        current_room.map[decode(exit_button.x().integer(), exit_button.y().integer())] = 0;
+                        jump = 2;
+                    }
+                    else
+                    {
+                        if (exit_button.horizontal_scale() > 1)
+                        {
+                            bn::blending::set_transparency_alpha(lerp(bn::blending::transparency_alpha(), 1, bn::fixed(0.05)));
+                            exit_button.set_scale(exit_button.horizontal_scale() - bn::fixed(0.05), exit_button.horizontal_scale() - bn::fixed(0.05));
+                        }
+                        else
+                        {
+                            if (distance(player, exit_button) < 8 && dead == 0)
+                            {
+                                exit_button.set_visible(false);
+                                chari_sound(global->chari_offset, 0);
+                                dead = 1;
+                            }
+                            jump = 0;
+                        }
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    bn::blending::set_transparency_alpha(lerp(bn::blending::transparency_alpha(), 1, bn::fixed(0.7)));
+                    exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), (((ticker / 4) % 4) * 4) + 2);
+
+                    if ((ticker / 128) % 8 == 4)
+                    {
+                        boss_ammo.set_position(exit_button.x(), exit_button.y() - 16);
+                    }
+                    else
+                    {
+                        death = 0;
+                        exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), ((ticker / 4) % 4) * 4);
+
+                        // Approach player
+                        bn::fixed toVector_x = player.x() - boss_ammo.x();
+                        bn::fixed toVector_y = player.y() - boss_ammo.y();
+                        bn::fixed maxDistanceDelta = bn::fixed(1);
+                        bn::fixed sqDist = (toVector_x * toVector_x) + (toVector_y * toVector_y);
+                        if (sqDist == 0 || (maxDistanceDelta >= 0 && sqDist <= maxDistanceDelta * maxDistanceDelta))
+                        {
+                            boss_ammo.set_position(boss_ammo.x(), boss_ammo.y());
+                        }
+                        else
+                        {
+                            bn::fixed dist = sqrt(sqDist);
+                            boss_ammo.set_position(
+                                boss_ammo.x() + ((toVector_x / dist) * maxDistanceDelta),
+                                boss_ammo.y() + ((toVector_y / dist) * maxDistanceDelta));
+                        }
+                    }
+
+                    if (distance(player, boss_ammo) < 8 && dead == 0)
+                    {
+                        dead = 1;
+                        chari_sound(global->chari_offset, 0);
+                        bn::sound_items::pew_die.play();
+                    }
+
+                    boss_ammo.set_rotation_angle((ticker * 4) % 360);
+                    boss_ammo.put_above();
+                    boss_ammo.set_visible(true);
+                    break;
+                }
+                default:
+                {
+                    bn::blending::set_transparency_alpha(lerp(bn::blending::transparency_alpha(), 1, bn::fixed(0.7)));
+                    if (distance(bullet, exit_button) < 24 && bullet.visible())
+                    {
+                        bullet.set_visible(false);
+                        bn::sound_items::pew_die.play();
+                        bn::sound_items::rufus_01.play();
+                        bn::blending::set_intensity_alpha(1);
+                        boss_lives--;
+                    }
+
+                    if (exit_button.horizontal_scale() > 1)
+                    {
+                        exit_button.set_scale(exit_button.horizontal_scale() - bn::fixed(0.1));
+                    }
+
+                    if (death == 0)
+                    {
+                        exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), ((ticker / 4) % 4) * 4);
+                    }
+                    else
+                    {
+                        exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), 3);
+                    }
+
+                    if (distance(player, exit_button) < 8)
+                    {
+                        dead = 1;
+                    }
+                    break;
+                }
+                }
             }
             else
             {
-                exit_door.value().set_visible(false);
-                exit_door_init = false;
-                current_room.map[exit_door_loc] = 0;
-                bn::sound_items::box_02.play();
+                return 1;
+            }
+
+            exit_button.set_blending_enabled(true);
+        }
+        else
+        {
+            if (exit_button_init)
+            {
+                if (
+                    (distance(player, exit_button) < 16) ||
+                    (distance(bullet, exit_button) < 16 && bullet.visible()) ||
+                    (current_room.map[decode(exit_button.x().integer(), exit_button.y().integer())] == 1))
+                {
+                    exit_button_init = false;
+                    exit_button.set_visible(false);
+                    bn::sound_items::box_01.play();
+                    int leg_x = exit_button.x().integer();
+                    int leg_y = exit_button.y().integer();
+                    exit_button = bn::sprite_items::items.create_sprite(leg_x, leg_y, 5);
+                    exit_button.put_below();
+                }
+            }
+            else if (exit_door_init)
+            {
+                bn::fixed scale = exit_door.horizontal_scale() - bn::fixed(0.1);
+                if (scale > 0)
+                {
+                    exit_door.set_horizontal_scale(scale);
+                    exit_door.set_x(exit_door.x() - 1);
+                }
+                else
+                {
+                    exit_door.set_visible(false);
+                    exit_door_init = false;
+                    current_room.map[exit_door_loc] = 0;
+                    bn::sound_items::box_02.play();
+                }
             }
         }
 
@@ -774,7 +997,7 @@ int linear_gameplay()
                     {
                         for (int i = 0; i < sprites_b.size(); i++)
                         {
-                            if (bn::abs((sprites_b.at(i).sprite.x() - bullet.x()).integer()) + bn::abs((sprites_b.at(i).sprite.y() - bullet.y()).integer()) < 18)
+                            if (distance(sprites_b.at(i).sprite, bullet) < 18)
                             {
                                 sprites_b.at(i).push(0, 0);
                             }
@@ -1464,7 +1687,7 @@ int show_cutscenes(int scene)
     bn::vector<bn::sprite_ptr, 35> text_sprites1;
     bn::vector<bn::sprite_ptr, 35> text_sprites2;
 
-    bn::music_items::bored2.play(0.5);
+    // bn::music_items::bored2.play(0.5);
 
     // Background stuff
     bn::regular_bg_ptr bg_space = bn::regular_bg_items::bg_space.create_bg(0, 0);
@@ -1655,6 +1878,42 @@ int show_cutscenes(int scene)
                 {
                     maxframes = 16;
                     push_tile(cutscene26);
+                    break;
+                }
+                case 27:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene27);
+                    break;
+                }
+                case 28:
+                {
+                    maxframes = 8;
+                    push_tile(cutscene28);
+                    break;
+                }
+                case 29:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene29);
+                    break;
+                }
+                case 30:
+                {
+                    maxframes = 25;
+                    push_tile(cutscene30);
+                    break;
+                }
+                case 31:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene31);
+                    break;
+                }
+                case 32:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene32);
                     break;
                 }
                 default:
@@ -1952,10 +2211,45 @@ int show_cutscenes(int scene)
                     frame = 0;
                     pos++;
                 }
+                else if (strcmp(sent1, "S27") == 0)
+                {
+                    cutscene = 27;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S28") == 0)
+                {
+                    cutscene = 28;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S29") == 0)
+                {
+                    cutscene = 29;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S30") == 0)
+                {
+                    cutscene = 30;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S31") == 0)
+                {
+                    cutscene = 31;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S32") == 0)
+                {
+                    cutscene = 32;
+                    frame = 0;
+                    pos++;
+                }
                 else if (strcmp(sent1, "M_KILL") == 0)
                 {
-                    if (bn::music::playing())
-                        bn::music::stop();
+                    music_stop();
                     frame = 0;
                     pos++;
                 }
@@ -2113,10 +2407,7 @@ int mainmenu()
         {
             stage = 50;
             bn::sound_items::click.play();
-            if (bn::music::playing())
-            {
-                bn::music::stop();
-            }
+            music_stop();
         }
 
         fire_action.update();
@@ -2136,9 +2427,14 @@ int main()
     // intro();
     // mainmenu();
 
+    music_stop();
+
+    global->current_level = 18;
+
     if (0 == 1)
     {
         // CHAPTER ONE
+        bn::music_items::bored2.play(0.6);
         show_cutscenes(2);
         bn::music_items::harp.play(0.5);
         while (global->current_level < 6)
@@ -2146,12 +2442,10 @@ int main()
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
         }
-        if (bn::music::playing())
-        {
-            bn::music::stop();
-        }
+        music_stop();
 
         // CHAPTER TWO
+        bn::music_items::bored2.play(0.6);
         show_cutscenes(3);
         bn::music_items::harp.play(0.5);
         while (global->current_level < 12)
@@ -2159,12 +2453,10 @@ int main()
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
         }
-        if (bn::music::playing())
-        {
-            bn::music::stop();
-        }
+        music_stop();
 
         // CHAPTER THREE
+        bn::music_items::bored2.play(0.6);
         show_cutscenes(5);
         bn::music_items::harp.play(0.5);
         while (global->current_level < 18)
@@ -2172,26 +2464,33 @@ int main()
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
         }
-        if (bn::music::playing())
-        {
-            bn::music::stop();
-        }
+        music_stop();
 
+        // Boss fight 1
+        bn::music_items::boss.play(0.6);
+        show_cutscenes(6);
+        while (global->current_level < 19)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level = 19;
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+    }
+
+    if (1 == 1)
+    {
         // CHAPTER FOUR
+        bn::music_items::bored2.play(0.6);
+        show_cutscenes(7);
         bn::music_items::harp.play(0.5);
         while (global->current_level < 24)
         {
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
         }
-        if (bn::music::playing())
-        {
-            bn::music::stop();
-        }
+        music_stop();
     }
-
-    global->current_level = 19;
-    linear_gameplay();
 
     // Fallback so it doesn't up and crash
     bn::regular_bg_ptr bg_message = bn::regular_bg_items::bg_message.create_bg(0, 0);
