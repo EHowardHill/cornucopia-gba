@@ -2429,7 +2429,7 @@ int main()
 
     music_stop();
 
-    global->current_level = 18;
+    global->current_level = -1;
 
     if (0 == 1)
     {
@@ -2480,6 +2480,16 @@ int main()
 
     if (1 == 1)
     {
+        bn::music_items::boss.play(0.6);
+        show_cutscenes(6);
+        while (global->current_level < 19)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level = 19;
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+
         // CHAPTER FOUR
         bn::music_items::bored2.play(0.6);
         show_cutscenes(7);
