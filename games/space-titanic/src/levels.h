@@ -291,6 +291,30 @@ const int l_long[135] = {
     1, 0, 0, -1, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, -6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
+// Jasper bits
+
+const int l_newgrav[135] = {
+    1, 1, 1, 1, 1, 1, 1, -7, 1, 1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 1, 0, -3, 0, 1, -5, 1,
+    1, 0, 10, 12, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1,
+    1, 0, 11, 13, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1,
+    1, 0, 0, 0, 0, 0, -17, 0, -1, 0, 1, 0, 1, 0, 1,
+    1, 0, 10, 12, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1,
+    1, 0, 11, 13, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, -6, 1, 1, 1, 1, 1, 1, 1};
+
+const int l_sneaky[135] = {
+    1, 1, 1, 1, 1, 1, 1, -7, 1, 1, 1, 1, 1, 1, 1,
+    1, -5, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2, 0, 1,
+    1, 0, -69, -18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, -8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, -6, 1, 1, 1, 1, 1, 1, 1};
+
 // Custom classes
 class Room
 {
@@ -298,9 +322,9 @@ public:
     int map[135] = {0};
     int start_x = 0;
     int start_y = 0;
-    bool default_gravity = false;
     int intro_monologue = 0;
     int intro_monologue_pos = 0;
+    bool gravity = false;
     void const *resolve_level;
 
     void setup(int current_level)
@@ -500,12 +524,32 @@ public:
             break;
         }
 
+        // Jasper Basper
+        case 26:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_newgrav;
+            intro_monologue = 9;
+            gravity = true;
+            break;
+        }
+        case 27:
+        {
+            start_x = encode_x(7);
+            start_y = encode_y(7);
+            resolve_level = l_sneaky;
+            gravity = true;
+            break;
+        }
+
         // Just in case
         default:
         {
-            start_x = encode_x(1);
+            start_x = encode_x(7);
             start_y = encode_y(7);
-            resolve_level = l_long;
+            resolve_level = l_sneaky;
+            gravity = true;
             break;
         }
         }

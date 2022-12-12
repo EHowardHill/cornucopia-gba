@@ -88,6 +88,10 @@
 #include "bn_sprite_items_cutscene30.h"
 #include "bn_sprite_items_cutscene31.h"
 #include "bn_sprite_items_cutscene32.h"
+#include "bn_sprite_items_cutscene33.h"
+#include "bn_sprite_items_cutscene34.h"
+#include "bn_sprite_items_cutscene35.h"
+#include "bn_sprite_items_cutscene36.h"
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
@@ -101,7 +105,7 @@
 
 inline bool gravity_allow(int x)
 {
-    return (x == 0 || x == -1 || x == -5);
+    return (x == 0 || x == -1 || x == -5 || (x < -16));
 }
 
 inline bool antigravity_allow(int x)
@@ -345,7 +349,6 @@ int linear_gameplay()
     current_room.setup(global->current_level);
 
     // Variable init
-    bool gravity = false;
     bool indicate = false;
     int pros_x = current_room.start_x;
     int pros_y = current_room.start_y;
@@ -386,6 +389,7 @@ int linear_gameplay()
     bn::vector<Veggie, 2> veggies;
     bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
     bn::vector<bn::sprite_ptr, 32> text_sprites;
+    bn::vector<bn::sprite_ptr, 4> xray_sprites;
 
     // Background stuff
     bn::regular_bg_ptr bg_carpet = bn::regular_bg_items::bg_carpet.create_bg(0, 0);
@@ -452,6 +456,19 @@ int linear_gameplay()
             veggies.push_back(Veggie(resolve_x(i) + 32, resolve_y(i) + 32, 2));
             boss_battle = true;
         }
+        else if (current_room.map[i] == -69) {
+            bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), 0);
+            n.put_below();
+            sprites_v.push_back(n);
+        }
+        else if (current_room.map[i] < -16)
+        {
+            // xray_sprites
+            bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), current_room.map[i] * -1);
+            n.put_below();
+            n.set_visible(false);
+            xray_sprites.push_back(n);
+        }
         // Everything else
         else if (current_room.map[i] > 0)
         {
@@ -486,7 +503,7 @@ int linear_gameplay()
     bn::sprite_ptr player = bn::sprite_items::chari.create_sprite(pros_x, pros_y, 1);
 
     bn::sprite_animate_action<4> action = bn::create_sprite_animate_action_forever(
-        player, 4, bn::sprite_items::chari.tiles_item(), 0, 0, 0, 0);
+        player, 4, bn::sprite_items::chari.tiles_item(), global->chari_offset, global->chari_offset, global->chari_offset, global->chari_offset);
 
     while (true)
     {
@@ -548,14 +565,14 @@ int linear_gameplay()
                     }
                     }
 
-                    if (bn::keypad::a_pressed() && !gravity)
+                    if (bn::keypad::a_pressed() && !current_room.gravity)
                     {
                         if (sprites_b.at(i).type == 0)
                         {
                             freefall = D_RIGHT;
                             bn::sound_items::box_01.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!gravity)
+                            if (!current_room.gravity)
                             {
                                 sprites_b.at(i).push(-2, 0);
                             }
@@ -582,14 +599,14 @@ int linear_gameplay()
                         break;
                     }
                     }
-                    if (bn::keypad::a_pressed() && !gravity)
+                    if (bn::keypad::a_pressed() && !current_room.gravity)
                     {
                         if (sprites_b.at(i).type == 0)
                         {
                             freefall = D_LEFT;
                             bn::sound_items::box_01.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!gravity)
+                            if (!current_room.gravity)
                             {
                                 sprites_b.at(i).push(2, 0);
                             }
@@ -619,14 +636,14 @@ int linear_gameplay()
                         break;
                     }
                     }
-                    if (bn::keypad::a_pressed() && !gravity)
+                    if (bn::keypad::a_pressed() && !current_room.gravity)
                     {
                         if (sprites_b.at(i).type == 0)
                         {
                             freefall = D_DOWN;
                             bn::sound_items::box_01.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!gravity)
+                            if (!current_room.gravity)
                             {
                                 sprites_b.at(i).push(0, -2);
                             }
@@ -653,14 +670,14 @@ int linear_gameplay()
                         break;
                     }
                     }
-                    if (bn::keypad::a_pressed() && !gravity)
+                    if (bn::keypad::a_pressed() && !current_room.gravity)
                     {
                         if (sprites_b.at(i).type == 0)
                         {
                             freefall = D_UP;
                             bn::sound_items::box_01.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!gravity)
+                            if (!current_room.gravity)
                             {
                                 sprites_b.at(i).push(0, 2);
                             }
@@ -951,7 +968,7 @@ int linear_gameplay()
         else
         {
             // Handle strope bar
-            if (notice == 1 && button.x() < -7 * 16 && !gravity)
+            if (notice == 1 && button.x() < -7 * 16 && !current_room.gravity)
             {
                 button.set_x(button.x() + 2);
                 if (text_sprites.size() == 0)
@@ -964,7 +981,7 @@ int linear_gameplay()
                     }
                 }
             }
-            else if (notice == 3 && button.x() < -7 * 16 && !gravity)
+            else if (notice == 3 && button.x() < -7 * 16 && !current_room.gravity)
             {
                 button.set_x(button.x() + 2);
                 if (text_sprites.size() == 0)
@@ -1111,7 +1128,7 @@ int linear_gameplay()
             }
 
             // Handle player rotation
-            if (gravity)
+            if (current_room.gravity)
             {
                 rotate = 0;
             }
@@ -1133,6 +1150,7 @@ int linear_gameplay()
                 {
                     indicate = false;
 
+                    BN_LOG(global->chari_offset);
                     global->chari_offset = (global->chari_offset + XYLIA) % 39;
 
                     if (global->current_level < 6 && global->chari_offset > LUNA)
@@ -1148,11 +1166,22 @@ int linear_gameplay()
                         global->chari_offset = LUNA;
                     }
 
+                    // If gravity, set sprite
+                    if (current_room.gravity)
+                    {
+                        action = bn::create_sprite_animate_action_forever(
+                            player, 4, bn::sprite_items::chari.tiles_item(), global->chari_offset, global->chari_offset, global->chari_offset, global->chari_offset);
+                    }
+
                     bullet.set_visible(false);
                     for (int i = 0; i < sprites_v.size(); i++)
                     {
                         bn::sprite_palette_ptr palette = sprites_v.at(i).palette();
                         palette.set_inverted(false);
+                    }
+                    for (int i = 0; i < xray_sprites.size(); i++)
+                    {
+                        xray_sprites.at(i).set_visible(false);
                     }
                     bn::bg_palette_ptr bg_palette = bg_carpet.palette();
                     bg_palette.set_inverted(false);
@@ -1203,14 +1232,18 @@ int linear_gameplay()
                                     bn::sprite_palette_ptr palette = sprites_v.at(i).palette();
                                     palette.set_inverted(true);
                                 }
+                                for (int i = 0; i < xray_sprites.size(); i++)
+                                {
+                                    xray_sprites.at(i).set_visible(true);
+                                }
                                 bn::bg_palette_ptr bg_palette = bg_carpet.palette();
                                 bg_palette.set_inverted(true);
                                 bn::sound_items::space_01.play();
                             }
                         }
 
-                        // When gravity is activated
-                        if (gravity)
+                        // When current_room.gravity is activated
+                        if (current_room.gravity)
                         {
 
                             int held_key = 0;
@@ -1249,6 +1282,10 @@ int linear_gameplay()
                                 {
                                     pros_y += 16;
                                 }
+                                if (current_room.gravity)
+                                {
+                                    player.set_horizontal_flip(false);
+                                }
                             }
 
                             if (held_key == 0)
@@ -1283,7 +1320,7 @@ int linear_gameplay()
                                 }
                             }
 
-                            // No gravity, but stable
+                            // No current_room.gravity, but stable
                         }
                         else if (freefall == 0)
                         {
@@ -1496,6 +1533,10 @@ int linear_gameplay()
                                     bn::sprite_palette_ptr palette = sprites_v.at(i).palette();
                                     palette.set_inverted(false);
                                 }
+                                for (int i = 0; i < xray_sprites.size(); i++)
+                                {
+                                    xray_sprites.at(i).set_visible(false);
+                                }
                                 bn::bg_palette_ptr bg_palette = bg_carpet.palette();
                                 bg_palette.set_inverted(false);
                                 bn::sound_items::space_02.play();
@@ -1547,7 +1588,7 @@ int linear_gameplay()
                     player.set_x(player.x() - 1);
                     if (orientation != 1)
                     {
-                        if (gravity)
+                        if (current_room.gravity)
                         {
                             action = bn::create_sprite_animate_action_forever(
                                 player, 4, bn::sprite_items::chari.tiles_item(), 3 + global->chari_offset, 4 + global->chari_offset, 3 + global->chari_offset, 5 + global->chari_offset);
@@ -1558,7 +1599,7 @@ int linear_gameplay()
                                 player, 4, bn::sprite_items::chari.tiles_item(), 7 + global->chari_offset, 8 + global->chari_offset, 7 + global->chari_offset, 8 + global->chari_offset);
                         }
                         orientation = 1;
-                        player.set_horizontal_flip(gravity);
+                        player.set_horizontal_flip(current_room.gravity);
                     }
 
                     // Go right
@@ -1568,7 +1609,7 @@ int linear_gameplay()
                     player.set_x(player.x() + 1);
                     if (orientation != 2)
                     {
-                        if (gravity)
+                        if (current_room.gravity)
                         {
                             action = bn::create_sprite_animate_action_forever(
                                 player, 4, bn::sprite_items::chari.tiles_item(), 3 + global->chari_offset, 4 + global->chari_offset, 3 + global->chari_offset, 5 + global->chari_offset);
@@ -1589,7 +1630,7 @@ int linear_gameplay()
                     player.set_y(player.y() - 1);
                     if (orientation != 3)
                     {
-                        if (gravity)
+                        if (current_room.gravity)
                         {
                             action = bn::create_sprite_animate_action_forever(
                                 player, 4, bn::sprite_items::chari.tiles_item(), 10 + global->chari_offset, 11 + global->chari_offset, 10 + global->chari_offset, 12 + global->chari_offset);
@@ -1609,7 +1650,7 @@ int linear_gameplay()
                     player.set_y(player.y() + 1);
                     if (orientation != 4)
                     {
-                        if (gravity)
+                        if (current_room.gravity)
                         {
                             action = bn::create_sprite_animate_action_forever(
                                 player, 4, bn::sprite_items::chari.tiles_item(), 0 + global->chari_offset, 1 + global->chari_offset, 0 + global->chari_offset, 2 + global->chari_offset);
@@ -1914,6 +1955,30 @@ int show_cutscenes(int scene)
                 {
                     maxframes = 3;
                     push_tile(cutscene32);
+                    break;
+                }
+                case 33:
+                {
+                    maxframes = 7;
+                    push_tile(cutscene33);
+                    break;
+                }
+                case 34:
+                {
+                    maxframes = 10;
+                    push_tile(cutscene34);
+                    break;
+                }
+                case 35:
+                {
+                    maxframes = 7;
+                    push_tile(cutscene35);
+                    break;
+                }
+                case 36:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene36);
                     break;
                 }
                 default:
@@ -2247,6 +2312,30 @@ int show_cutscenes(int scene)
                     frame = 0;
                     pos++;
                 }
+                else if (strcmp(sent1, "S33") == 0)
+                {
+                    cutscene = 33;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S34") == 0)
+                {
+                    cutscene = 34;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S35") == 0)
+                {
+                    cutscene = 35;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S36") == 0)
+                {
+                    cutscene = 36;
+                    frame = 0;
+                    pos++;
+                }
                 else if (strcmp(sent1, "M_KILL") == 0)
                 {
                     music_stop();
@@ -2429,12 +2518,12 @@ int main()
 
     music_stop();
 
-    global->current_level = -1;
+    global->current_level = 26;
 
     if (0 == 1)
     {
         // CHAPTER ONE
-        bn::music_items::bored2.play(0.6);
+        bn::music_items::bored.play(0.6);
         show_cutscenes(2);
         bn::music_items::harp.play(0.5);
         while (global->current_level < 6)
@@ -2476,25 +2565,26 @@ int main()
             global->current_level += linear_gameplay();
         }
         music_stop();
-    }
-
-    if (1 == 1)
-    {
-        bn::music_items::boss.play(0.6);
-        show_cutscenes(6);
-        while (global->current_level < 19)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level = 19;
-            global->current_level += linear_gameplay();
-        }
-        music_stop();
 
         // CHAPTER FOUR
         bn::music_items::bored2.play(0.6);
         show_cutscenes(7);
         bn::music_items::harp.play(0.5);
         while (global->current_level < 24)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+    }
+
+    if (1 == 1)
+    {
+        // CHAPTER FOUR
+        // bn::music_items::bored2.play(0.6);
+        // show_cutscenes(8);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 30)
         {
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
