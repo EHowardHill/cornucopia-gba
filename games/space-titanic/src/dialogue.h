@@ -46,7 +46,7 @@ const char d_intro_02[][32] = {
     "FEATURE UNLOCKED:",
     "You can now play as Xylia!",
     "Press either trigger to swap",
-    "characters and use the B button",
+    "characters and tap the B button",
     "to use their unique ability.",
     "$"};
 
@@ -164,37 +164,66 @@ const char d_journal03[][81] = {
     " $"};
 
 const char d_journal04[][81] = {
-    "3You're too late, humans! Tonight, we feast on Vegginians!",
+    " S28",
+    "3You're too late, humans! Tonight,  we feast on Vegginians!",
+    " S17",
     "0Vegons! I should have known!",
-    "1Is that the species with the really bad poetry?",
+    " S27",
+    "1Is that the species with the reallybad poetry?",
+    " S29",
     "2No, those are humans.",
-    "1Look, do you want us to save you or not?",
-    "0Don't be afraid, Vegginians! Help is on the way!",
+    " S27",
+    "1Look, do you want us to save you ornot?",
+    " S17",
+    "0Don't be afraid, Vegginian! Help ison the way!",
     " $"
 };
 
-/*
 const char d_journal05[][81] = {
-    "0Col. Green! Are you okay?",
-    "2Absolutely steamed! Clearly, one security guard was not enough. We needed at least four.",
+    " S30",
+    "0...",
+    "0Mr. Tomato! Are you okay?",
+    " S31",
+    "2Absolutely steamed! Clearly, one   security guard was not enough.",
+    "2We needed at least three.",
+    " S32",
     "0What are we going to do?",
-    "2Young lady, you are the security guard.",
-    "2You're the only one qualified to handle this situation.",
+    " S31",
+    "2Young lady, you are the security   guard.",
+    "2You're the only one qualified to   handle this situation.",
+    " S32",
     "0Oh... right. Well, we're trying to get the gravity back on.",
-    "2Well, hurry up, then!"
+    " S31",
+    "2Well, hurry up, then!",
     " $"
-}
+};
 
 const char d_journal06[][81] = {
-    "2Looks like the installation was a success! Gravity is back.",
-    "2Despite your best efforts.",
-    "1How was I supposed to know Vegons were on board?",
-    "2Now, we just need to get to the other two control panels.",
-    "0No problem. We'll escort you.",
-    "1Do we have to?",
+    " S33",
+    "0Finally! There it is! Time to get  it back to Jasper.",
+    " S34",
+    "2Looks like the installation was a  success! Gravity is back... here.",
+    "2Now we just need to get to the     other control panel.",
+    "2Half the ship is still out of      gravity.",
+    "2(Despite your best efforts.)",
+    " S35",
+    "1Hey! How was I supposed to know    Vegons were on board?",
+    " S36",
+    "0We'll escort you. We should get    everything back in no time!",
+    " S35",
+    "1Ugh, do we have to bring Jasper?",
     " $"
-}
+};
 
+const char d_intro_03[][32] = {
+    "FEATURE UNLOCKED:",
+    "You can now play as Jasper!",
+    "Press either trigger to swap",
+    "characters and tap the B button",
+    "to use their unique ability.",
+    "$"};
+
+/*
 const char d_journal07[][81] = {
     "2Am I crazy for thinking this is kind of fun?",
     "0I'll admit, I didn't expect this trip to be so exciting.",
@@ -291,6 +320,26 @@ resolve_dialogue(int requested_dialogue, int position = 0)
     case 5:
     {
         return &d_journal03[position];
+        break;
+    }
+    case 6:
+    {
+        return &d_journal04[position];
+        break;
+    }
+    case 7:
+    {
+        return &d_journal05[position];
+        break;
+    }
+    case 8:
+    {
+        return &d_journal06[position];
+        break;
+    }
+    case 9:
+    {
+        return &d_intro_03[position];
         break;
     }
     default:
