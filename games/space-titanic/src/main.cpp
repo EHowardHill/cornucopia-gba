@@ -52,6 +52,10 @@
 #include "bn_regular_bg_items_bg_space.h"
 #include "bn_regular_bg_items_bg_message.h"
 
+// Writing systems
+#include "bn_sprite_items_ws_arabic.h"
+#include "bn_sprite_items_ws_latin.h"
+
 // Cutscenes
 #include "bn_sprite_items_cutscene00.h"
 #include "bn_sprite_items_cutscene01.h"
@@ -2124,6 +2128,47 @@ int mainmenu()
     }
 }
 
+void text_demo()
+{
+    bn::vector<bn::sprite_ptr, 64> text;
+
+    int start_x = 100;
+    int start_y = 0;
+    int offset = -8;
+    int ref[256] = {
+        33, 14, 22, 52, 3, 14, 4, 18, 52, 19, 7, 8, 18, 52, 22, 14, 17, 10, -1};
+
+    int val = 0;
+    do
+    {
+        bn::sprite_ptr n = bn::sprite_items::ws_arabic.create_sprite(start_x, start_y, ref[val]);
+        n.set_visible(false);
+        text.push_back(n);
+        start_x += offset;
+        val++;
+    } while (ref[val] != -1);
+
+    while (true)
+    {
+
+        for (int t = 0; t < text.size(); t++)
+        {
+            if (!text.at(t).visible())
+            {
+                if (t % 3 == 0)
+                {
+                    bn::sound_items::click.play();
+                }
+
+                text.at(t).set_visible(true);
+                t = text.size();
+            }
+        }
+
+        bn::core::update();
+    }
+}
+
 int main()
 {
     // Initialization
@@ -2133,6 +2178,7 @@ int main()
         0}; // current character
     global = &global_instance;
 
+    text_demo();
     // intro();
     // mainmenu();
 
