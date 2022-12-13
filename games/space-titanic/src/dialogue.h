@@ -33,7 +33,8 @@ int strcmp(const char *p1, const char *p2)
 
 const char d_messages[][32] = {
     "Push wooden crate",
-    "Break rotten crate"};
+    "Break rotten crate",
+    "Reset tiles"};
 
 const char d_intro_01[][32] = {
     "Okay.. Gravity is out.",

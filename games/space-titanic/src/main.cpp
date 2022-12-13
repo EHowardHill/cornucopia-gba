@@ -49,10 +49,14 @@
 #include "bn_sprite_items_vegons_01.h"
 #include "bn_sprite_items_item_pots.h"
 #include "bn_sprite_items_veggies.h"
+#include "bn_sprite_items_squares.h"
+
+// Backgrounds
 #include "bn_regular_bg_items_bg_carpet.h"
 #include "bn_regular_bg_items_bg_cinemint.h"
 #include "bn_regular_bg_items_bg_space.h"
 #include "bn_regular_bg_items_bg_message.h"
+#include "bn_regular_bg_items_bg_door.h"
 
 // Writing systems
 #include "bn_sprite_items_ws_arabic.h"
@@ -376,6 +380,7 @@ int linear_gameplay()
     bn::sprite_ptr exit_button = bn::sprite_items::items.create_sprite(resolve_x(-1), resolve_y(-1), 4);
     bn::sprite_ptr exit_door = bn::sprite_items::items.create_sprite(resolve_x(-1), resolve_y(-1), 6);
     bn::sprite_ptr boss_ammo = bn::sprite_items::projectiles.create_sprite(0, 0, 6);
+    bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
     boss_ammo.set_palette(bn::sprite_items::buttons_green.palette_item());
     boss_ammo.set_visible(false);
 
@@ -391,7 +396,6 @@ int linear_gameplay()
     bn::vector<bn::sprite_ptr, 96> sprites_v;
     bn::vector<Barrel, 26> sprites_b;
     bn::vector<Veggie, 2> veggies;
-    bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 0);
     bn::vector<bn::sprite_ptr, 32> text_sprites;
     bn::vector<bn::sprite_ptr, 4> xray_sprites;
 
@@ -460,7 +464,8 @@ int linear_gameplay()
             veggies.push_back(Veggie(resolve_x(i) + 32, resolve_y(i) + 32, 2));
             boss_battle = true;
         }
-        else if (current_room.map[i] == -69) {
+        else if (current_room.map[i] == -69)
+        {
             bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), 0);
             n.put_below();
             sprites_v.push_back(n);
@@ -2508,7 +2513,7 @@ int mainmenu()
     }
 }
 
-void text_demo()
+int text_demo()
 {
     bn::vector<bn::sprite_ptr, 64> text;
 
@@ -2547,6 +2552,190 @@ void text_demo()
 
         bn::core::update();
     }
+
+    return 0;
+}
+
+int grid_minigame(int level = 0)
+{
+    const int size = 5;
+    bn::vector<bn::sprite_ptr, size * size> tiles;
+    bn::vector<bn::sprite_ptr, 32> text_sprites;
+    bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 1);
+    bn::regular_bg_ptr bg_door = bn::regular_bg_items::bg_door.create_bg(0, 0);
+    int ref[size * size] = {0};
+    int temp[size * size] = {0};
+    int text_delay = 0;
+    int window_y = 120;
+
+    // Entrance / exit window
+    bn::rect_window external_window = bn::rect_window::external();
+    external_window.set_show_bg(bg_door, false);
+    external_window.set_show_sprites(false);
+    external_window.set_boundaries(-80, -120, 80, window_y);
+
+    switch (level)
+    {
+    default:
+    {
+        ref[0] = 1;
+        ref[1] = 1;
+        ref[3] = 1;
+        ref[4] = 1;
+        ref[5] = 1;
+        ref[9] = 1;
+        break;
+    }
+    }
+
+    for (int t = 0; t < size * size; t++)
+    {
+        temp[t] = ref[t];
+        bn::sprite_ptr n = bn::sprite_items::squares.create_sprite(((t % size) * 16) - ((size / 2) * 16) - 1, ((t / size) * 16) - ((size / 2) * 16) - 16, ref[t]);
+        tiles.push_back(n);
+    }
+
+    int dest_x = size >> 1;
+    int dest_y = size >> 1;
+    bn::sprite_ptr tab = bn::sprite_items::buttons.create_sprite(0, 0);
+
+    while (true)
+    {
+        // Handle window
+        if (window_y > -80)
+        {
+            window_y -= 10;
+            external_window.set_boundaries(-80, -120, window_y, 120);
+        }
+
+        // Handle bottom thing
+        if (button.x() < -7 * 16)
+        {
+            button.set_x(button.x() + 2);
+            if (text_sprites.size() == 0)
+            {
+                const char *base_string = (char *)resolve_dialogue(0, 2);
+                text_generator.generate(-6 * 16, 72, &base_string[0], text_sprites);
+                for (int i = 0; i < text_sprites.size(); i++)
+                {
+                    text_sprites.at(i).set_visible(false);
+                }
+            }
+        }
+
+        if (text_sprites.size() > 0)
+        {
+            for (int i = 0; i < text_sprites.size(); i++)
+            {
+                if (text_sprites.at(i).y() < 72)
+                {
+                    text_sprites.at(i).set_y(text_sprites.at(i).y() + 1);
+                }
+                else if (text_delay < 16)
+                {
+                    text_delay++;
+                }
+                else if (!text_sprites.at(i).visible())
+                {
+                    text_sprites.at(i).set_visible(true);
+                    text_delay = 0;
+                    bn::sound_items::click.play(0.3);
+                    i = text_sprites.size();
+                }
+            }
+        }
+
+        if (bn::keypad::left_pressed())
+        {
+            dest_x--;
+            if (dest_x < 0)
+            {
+                dest_x = size - 1;
+            }
+        }
+        else if (bn::keypad::right_pressed())
+        {
+            dest_x++;
+            dest_x = dest_x % size;
+        }
+        else if (bn::keypad::up_pressed())
+        {
+            dest_y--;
+            if (dest_y < 0)
+            {
+                dest_y = size - 1;
+            }
+        }
+        else if (bn::keypad::down_pressed())
+        {
+            dest_y++;
+            dest_y = dest_y % size;
+        }
+
+        tab.set_position(
+            lerp(tab.x(), ((dest_x * 16) - 32), bn::fixed(0.5)),
+            lerp(tab.y(), ((dest_y * 16) - 48), bn::fixed(0.5)));
+
+        if (bn::keypad::a_pressed())
+        {
+            bn::sound_items::box_01.play(0.5);
+            for (int x = -1; x < 2; x++)
+            {
+                for (int y = -1; y < 2; y++)
+                {
+                    if (x == 0 || y == 0)
+                    {
+                        int nx = x + dest_x;
+                        int ny = y + dest_y;
+                        if (nx > -1 && ny > -1 && nx < size && ny < size)
+                        {
+                            int n = (nx % size) + (ny * size);
+                            ref[n] = (ref[n] + 1) % 2;
+                            tiles.at(n) = bn::sprite_items::squares.create_sprite(tiles.at(n).x(), tiles.at(n).y(), ref[n]);
+                        }
+                    }
+                }
+            }
+
+            bool pass = true;
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    if (ref[(x % size) + (y * size)] == 1)
+                        pass = false;
+                }
+            }
+            if (pass == true)
+            {
+                bn::sound_items::alert.play(0.5);
+                for (int n = 0; n < 24; n++)
+                {
+                    bn::core::update();
+                }
+                while (window_y < 80)
+                {
+                    window_y += 10;
+                    external_window.set_boundaries(-80, -120, window_y, 120);
+                    bn::core::update();
+                }
+                return true;
+            }
+            tab.put_above();
+        }
+        else if (bn::keypad::b_pressed())
+        {
+            bn::sound_items::box_02.play();
+            for (int t = 0; t < size * size; t++)
+            {
+                ref[t] = temp[t];
+            }
+        }
+
+        bn::core::update();
+    }
+
+    return 0;
 }
 
 int main()
@@ -2558,7 +2747,8 @@ int main()
         0}; // current character
     global = &global_instance;
 
-    text_demo();
+    // text_demo();
+
     // intro();
     // mainmenu();
 
@@ -2630,7 +2820,13 @@ int main()
         // bn::music_items::bored2.play(0.6);
         // show_cutscenes(8);
         bn::music_items::harp.play(0.5);
-        while (global->current_level < 30)
+        while (global->current_level < 28)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        grid_minigame(0);
+        while (global->current_level < 28)
         {
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
