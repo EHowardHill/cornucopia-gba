@@ -2726,9 +2726,10 @@ int grid_minigame(int level = 0)
         else if (bn::keypad::b_pressed())
         {
             bn::sound_items::box_02.play();
-            for (int t = 0; t < size * size; t++)
+            for (int n = 0; n < size * size; n++)
             {
-                ref[t] = temp[t];
+                ref[n] = temp[n];
+                tiles.at(n) = bn::sprite_items::squares.create_sprite(tiles.at(n).x(), tiles.at(n).y(), ref[n]);
             }
         }
 
