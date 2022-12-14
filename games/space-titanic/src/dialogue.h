@@ -177,8 +177,7 @@ const char d_journal04[][81] = {
     "1Look, do you want us to save you ornot?",
     " S17",
     "0Don't be afraid, Vegginian! Help ison the way!",
-    " $"
-};
+    " $"};
 
 const char d_journal05[][81] = {
     " S30",
@@ -196,8 +195,7 @@ const char d_journal05[][81] = {
     "0Oh... right. Well, we're trying to get the gravity back on.",
     " S31",
     "2Well, hurry up, then!",
-    " $"
-};
+    " $"};
 
 const char d_journal06[][81] = {
     " S33",
@@ -213,8 +211,7 @@ const char d_journal06[][81] = {
     "0We'll escort you. We should get    everything back in no time!",
     " S35",
     "1Ugh, do we have to bring Jasper?",
-    " $"
-};
+    " $"};
 
 const char d_intro_03[][32] = {
     "FEATURE UNLOCKED:",
@@ -235,8 +232,7 @@ const char d_intro_04[][32] = {
 const char d_boss02[][32] = {
     "Ugh! Out of gravity range,",
     "And now another Vegon?",
-    "This better go quick."
-}
+    "This better go quick."};
 
 const char d_journal07[][81] = {
     "2Am I crazy for thinking this is    kind of fun?",
@@ -246,15 +242,14 @@ const char d_journal07[][81] = {
     "0Xylia! Be nice!",
     "2Both.",
     "1That sounds nice. No image to keep up, no one telling you what to do.",
-    "2The freedom is nice. Being hungry  all the time is not."
+    "2The freedom is nice. Being hungry  all the time is not.",
     "2I grew up in the space circus, you know.",
     "0No way! I wonder if Xylia and I sawyou at some point. What did you do?",
     "2I ran the lightboard and did       repairs.",
     "1Last time I went to the circus, theflashing lights made me queasy.",
     "1So I guess we're even."
     "2Nah. It'd have to happen twice for us to be even.",
-    " $"
-}
+    " $"};
 
 const char d_journal08[][81] = {
     "0So how many of you ARE there?",
@@ -263,9 +258,9 @@ const char d_journal08[][81] = {
     "0Jasper!",
     "2What? She was hesitating too long!",
     "0I was right about to shoot!        Promise!"
-    " $"
-}
+    " $"};
 
+/*
 const char d_journal09[][81] = {
     "0It's over, Vegons! Surrender now, or else!",
     "3Or else what?",
@@ -299,8 +294,7 @@ const char d_credits[][32] = {
     "CORNUCOPIA",
     "Character design: Madelyn Watts",
     "Kickstarter backers",
-    " $"
-};
+    " $"};
 
 void const *
 resolve_dialogue(int requested_dialogue, int position = 0)

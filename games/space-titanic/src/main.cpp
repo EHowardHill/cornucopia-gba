@@ -161,8 +161,8 @@ global_data *global;
 class Barrel
 {
     int steps = 0;
-    int x_speed = 0;
-    int y_speed = 0;
+    bn::fixed x_speed = 0;
+    bn::fixed y_speed = 0;
 
 public:
     bn::sprite_ptr sprite = bn::sprite_items::items.create_sprite(0, 0, 1);
@@ -193,7 +193,7 @@ public:
     }
 
     // poosh
-    void push(int x, int y)
+    void push(bn::fixed x, bn::fixed y)
     {
         switch (type)
         {
@@ -222,8 +222,8 @@ public:
     {
         int init_x = sprite.x().integer();
         int init_y = sprite.y().integer();
-        int x_speed_prior = x_speed;
-        int y_speed_prior = y_speed;
+        bn::fixed x_speed_prior = x_speed;
+        bn::fixed y_speed_prior = y_speed;
 
         if (x_speed != 0 || y_speed != 0)
         {
@@ -233,8 +233,8 @@ public:
         }
 
         if (current_room->map[decode(
-                sprite.x().integer() + (x_speed / 2) + (x_speed * 4),
-                sprite.y().integer() + +(y_speed / 2) + (y_speed * 4))] == 1)
+                (sprite.x() + (x_speed / 2) + (x_speed * 4)).integer(),
+                (sprite.y() + (y_speed / 2) + (y_speed * 4)).integer())] == 1)
         {
             x_speed = 0;
             y_speed = 0;
@@ -482,6 +482,13 @@ int linear_gameplay()
             bn::sprite_ptr n = bn::sprite_items::projectiles.create_sprite(resolve_x(i), resolve_y(i), 4);
             n.put_below();
             sprites_v.push_back(n);
+        }
+        else if (current_room.map[i] == -71)
+        {
+            Barrel b = Barrel(resolve_x(i), resolve_y(i), &current_room, 1);
+            sprites_b.at(i).push(0, -0.2);
+            sprites_b.push_back(b);
+            current_room.map[i] = 1;
         }
         else if (current_room.map[i] < -16)
         {
@@ -2853,10 +2860,7 @@ int main()
         }
         grid_minigame(0);
         music_stop();
-    }
 
-    if (1 == 1)
-    {
         // BOSS 2
         bn::music_items::boss.play(0.6);
         while (global->current_level < 32)
@@ -2865,6 +2869,12 @@ int main()
             global->current_level += linear_gameplay();
         }
         music_stop();
+    }
+
+    if (1 == 1)
+    {
+        global->current_level = 32;
+        linear_gameplay();
     }
 
     // Fallback so it doesn't up and crash
