@@ -224,20 +224,34 @@ const char d_intro_03[][32] = {
     "to use their unique ability.",
     "$"};
 
-/*
+const char d_intro_04[][32] = {
+    "WARNING: SATELLITE DETECTED",
+    "Jasper's third eye is very",
+    "sensitive, and it may get",
+    "damaged if you use it in",
+    "range of the satellite!",
+    "$"};
+
+const char d_boss02[][32] = {
+    "Ugh! Out of gravity range,",
+    "And now another Vegon?",
+    "This better go quick."
+}
+
 const char d_journal07[][81] = {
-    "2Am I crazy for thinking this is kind of fun?",
-    "0I'll admit, I didn't expect this trip to be so exciting.",
-    "1Tell me, are you stowing away for the adventure or because you're poor?",
+    "2Am I crazy for thinking this is    kind of fun?",
+    "0I'll admit, I didn't expect this   trip to be so exciting.",
+    "1Tell me, are you stowing away for  the adventure,",
+    "1Or are you just poor?",
+    "0Xylia! Be nice!",
     "2Both.",
-    "1You know..",
-    "0Be nice, Xylia.",
     "1That sounds nice. No image to keep up, no one telling you what to do.",
-    "2The freedom is nice. Being hungry all the time is not."
+    "2The freedom is nice. Being hungry  all the time is not."
     "2I grew up in the space circus, you know.",
-    "0No way! I wonder if Xylia and I saw you at some point. What did you do?",
-    "2I ran the lightboard and did repairs.",
-    "1Last time I went to the circus, the flashing lights made me queasy. So I guess we're even.",
+    "0No way! I wonder if Xylia and I sawyou at some point. What did you do?",
+    "2I ran the lightboard and did       repairs.",
+    "1Last time I went to the circus, theflashing lights made me queasy.",
+    "1So I guess we're even."
     "2Nah. It'd have to happen twice for us to be even.",
     " $"
 }
@@ -247,8 +261,8 @@ const char d_journal08[][81] = {
     "3Enough to defeat you three!",
     "1Stand down, Vegon!",
     "0Jasper!",
-    "2What? I figured she wasn't going to use it.",
-    "0I really was that time!"
+    "2What? She was hesitating too long!",
+    "0I was right about to shoot!        Promise!"
     " $"
 }
 
@@ -256,7 +270,8 @@ const char d_journal09[][81] = {
     "0It's over, Vegons! Surrender now, or else!",
     "3Or else what?",
     "1C'mon, Luna.",
-    "2You got this!",
+    "2Shoot him already!",
+    "0I'm aiming! Gimme a moment!"
     "3Bad move."
 }
 
@@ -264,15 +279,9 @@ const char d_journal10[][81] = {
     "1Luna? Are you okay?",
     "0...Ow.",
     "2Yeah, that stun beam hurts, huh.",
-    "0..I really sorry, guys. I.. I failed you. I'm not good enough to be a security guard.",
-    "2Oh come on, you've done a great job so far! You just don't like zapping people. But that can be fixed.",
-    "0What do you mean?",
-    "2See that stunned Vegon on the ground? He's not bothering nobody. No one says you can't zap him as he is.",
-    "0That seems cruel.",
-    "2Dude, he was literally right about to eat your clients.",
-    "0...Okay... You can do this, Luna.",
-    "2Uh.. Luna, that's enough.",
-    "1Jasper! You broke sweet, innocent Luna!"
+    "0..I really sorry, guys.            ",
+    "0I.. I failed you. I'm not good enough to be",
+    "0a security guard.",
     "0It's all done, isn't it? The Vegons are in jail, the Vegginians are happy, and I'm getting paid.",
     "2This is where I hitch a ride on the next spaceship. I'll admit though, I'm gonna miss you guys.",
     "1Hey.. When can I see you again?",
@@ -341,6 +350,16 @@ resolve_dialogue(int requested_dialogue, int position = 0)
     case 9:
     {
         return &d_intro_03[position];
+        break;
+    }
+    case 10:
+    {
+        return &d_intro_04[position];
+        break;
+    }
+    case 11:
+    {
+        return &d_boss02[position];
         break;
     }
     default:

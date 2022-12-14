@@ -373,7 +373,7 @@ int linear_gameplay()
     int ticker = -1;
     int jump = 0;
     int boss_lives = 12;
-    int death = 0;
+    int xray_kill_x = 0;
     bool boss_battle = false;
     bool exit_door_init = false;
     bool exit_button_init = false;
@@ -393,7 +393,7 @@ int linear_gameplay()
     entr_door.set_horizontal_scale(0.1);
 
     // Set up vectors
-    bn::vector<bn::sprite_ptr, 96> sprites_v;
+    bn::vector<bn::sprite_ptr, 128> sprites_v;
     bn::vector<Barrel, 26> sprites_b;
     bn::vector<Veggie, 2> veggies;
     bn::vector<bn::sprite_ptr, 32> text_sprites;
@@ -464,9 +464,22 @@ int linear_gameplay()
             veggies.push_back(Veggie(resolve_x(i) + 32, resolve_y(i) + 32, 2));
             boss_battle = true;
         }
+        else if (current_room.map[i] == -68)
+        {
+            bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), 19);
+            n.put_below();
+            sprites_v.push_back(n);
+            xray_kill_x = resolve_x(i);
+        }
         else if (current_room.map[i] == -69)
         {
             bn::sprite_ptr n = bn::sprite_items::world.create_sprite(resolve_x(i), resolve_y(i), 0);
+            n.put_below();
+            sprites_v.push_back(n);
+        }
+        else if (current_room.map[i] == -70)
+        {
+            bn::sprite_ptr n = bn::sprite_items::projectiles.create_sprite(resolve_x(i), resolve_y(i), 4);
             n.put_below();
             sprites_v.push_back(n);
         }
@@ -803,7 +816,6 @@ int linear_gameplay()
                     }
                     else
                     {
-                        death = 0;
                         exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), ((ticker / 4) % 4) * 4);
 
                         // Approach player
@@ -853,14 +865,7 @@ int linear_gameplay()
                         exit_button.set_scale(exit_button.horizontal_scale() - bn::fixed(0.1));
                     }
 
-                    if (death == 0)
-                    {
-                        exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), ((ticker / 4) % 4) * 4);
-                    }
-                    else
-                    {
-                        exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), 3);
-                    }
+                    exit_button = bn::sprite_items::vegons_01.create_sprite(exit_button.x(), exit_button.y(), ((ticker / 4) % 4) * 4);
 
                     if (distance(player, exit_button) < 8)
                     {
@@ -911,6 +916,12 @@ int linear_gameplay()
                     bn::sound_items::box_02.play();
                 }
             }
+        }
+
+        // Xray killer
+        if (xray_kill_x != 0 && global->chari_offset == JASPER && xray_kill_x < player.x().integer() && indicate == 1)
+        {
+            dead = 1;
         }
 
         // Is intro monologue happening?
@@ -2576,7 +2587,7 @@ int grid_minigame(int level = 0)
 
     switch (level)
     {
-    default:
+    case 1:
     {
         ref[0] = 1;
         ref[1] = 1;
@@ -2584,6 +2595,16 @@ int grid_minigame(int level = 0)
         ref[4] = 1;
         ref[5] = 1;
         ref[9] = 1;
+        break;
+    }
+    default:
+    {
+        ref[16] = 1;
+        ref[17] = 1;
+        ref[18] = 1;
+        ref[20] = 1;
+        ref[22] = 1;
+        ref[24] = 1;
         break;
     }
     }
@@ -2731,6 +2752,7 @@ int grid_minigame(int level = 0)
                 ref[n] = temp[n];
                 tiles.at(n) = bn::sprite_items::squares.create_sprite(tiles.at(n).x(), tiles.at(n).y(), ref[n]);
             }
+            tab.put_above();
         }
 
         bn::core::update();
@@ -2755,7 +2777,7 @@ int main()
 
     music_stop();
 
-    global->current_level = 26;
+    global->current_level = 31;
 
     if (0 == 1)
     {
@@ -2813,21 +2835,31 @@ int main()
             global->current_level += linear_gameplay();
         }
         music_stop();
-    }
 
-    if (1 == 1)
-    {
-        // CHAPTER FOUR
-        // bn::music_items::bored2.play(0.6);
-        // show_cutscenes(8);
+        // CHAPTER FIVE
+        bn::music_items::bored2.play(0.6);
+        show_cutscenes(8);
         bn::music_items::harp.play(0.5);
         while (global->current_level < 28)
         {
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
         }
+        grid_minigame(1);
+        while (global->current_level < 31)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
         grid_minigame(0);
-        while (global->current_level < 28)
+        music_stop();
+    }
+
+    if (1 == 1)
+    {
+        // BOSS 2
+        bn::music_items::boss.play(0.6);
+        while (global->current_level < 32)
         {
             bn::sound_items::alert.play(0.5);
             global->current_level += linear_gameplay();
