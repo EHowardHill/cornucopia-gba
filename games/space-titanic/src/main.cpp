@@ -11,11 +11,9 @@
 #include "bn_core.h"
 #include "bn_log.h"
 #include "bn_music.h"
-
 #include "bn_music_actions.h"
 #include "bn_music_items.h"
 #include "bn_sound_items.h"
-
 #include "bn_rect_window_actions.h"
 #include "bn_rect_window_boundaries_hbe_ptr.h"
 #include "bn_sram.h"
@@ -57,6 +55,10 @@
 #include "bn_regular_bg_items_bg_space.h"
 #include "bn_regular_bg_items_bg_message.h"
 #include "bn_regular_bg_items_bg_door.h"
+
+// Credits
+#include "bn_regular_bg_items_bg_message.h"
+#include "bn_regular_bg_items_bg_message2.h"
 
 // Writing systems
 #include "bn_sprite_items_ws_arabic.h"
@@ -100,6 +102,33 @@
 #include "bn_sprite_items_cutscene34.h"
 #include "bn_sprite_items_cutscene35.h"
 #include "bn_sprite_items_cutscene36.h"
+#include "bn_sprite_items_cutscene37.h"
+#include "bn_sprite_items_cutscene38.h"
+#include "bn_sprite_items_cutscene38b.h"
+#include "bn_sprite_items_cutscene39.h"
+#include "bn_sprite_items_cutscene40.h"
+#include "bn_sprite_items_cutscene41.h"
+#include "bn_sprite_items_cutscene42.h"
+#include "bn_sprite_items_cutscene43.h"
+#include "bn_sprite_items_cutscene44.h"
+#include "bn_sprite_items_cutscene45.h"
+#include "bn_sprite_items_cutscene46.h"
+#include "bn_sprite_items_cutscene47.h"
+#include "bn_sprite_items_cutscene48.h"
+#include "bn_sprite_items_cutscene49.h"
+#include "bn_sprite_items_cutscene50.h"
+#include "bn_sprite_items_cutscene51.h"
+#include "bn_sprite_items_cutscene52.h"
+#include "bn_sprite_items_cutscene53.h"
+#include "bn_sprite_items_cutscene54.h"
+#include "bn_sprite_items_cutscene55.h"
+#include "bn_sprite_items_cutscene56.h"
+#include "bn_sprite_items_cutscene57.h"
+
+#define IWRAM_CODE __attribute__((section(".iwram.text"), long_call))
+#define EWRAM_CODE __attribute__((section(".ewram.text"), long_call))
+#define IWRAM_DATA __attribute__((section(".iwram.data")))
+#define EWRAM_DATA __attribute__((section(".ewram.data")))
 
 #define encode_x(x) (x * 16) - 120 + 8
 #define encode_y(y) (y * 16) - 80 + 8
@@ -197,6 +226,13 @@ public:
     {
         switch (type)
         {
+        case 2:
+        {
+            x_speed = x;
+            y_speed = y;
+            steps = 0;
+            break;
+        }
         case 1:
         {
             bn::sound_items::crunch.play();
@@ -214,36 +250,61 @@ public:
             int *base_level = (int *)current_room->resolve_level;
             current_room->map[decode(sprite.x().integer(), sprite.y().integer())] = base_level[decode(sprite.x().integer(), sprite.y().integer())];
             steps = 0;
+            break;
         }
         }
     }
 
     void update()
     {
-        int init_x = sprite.x().integer();
-        int init_y = sprite.y().integer();
+        bn::fixed init_x = sprite.x();
+        bn::fixed init_y = sprite.y();
         bn::fixed x_speed_prior = x_speed;
         bn::fixed y_speed_prior = y_speed;
 
         if (x_speed != 0 || y_speed != 0)
         {
-            sprite.set_x(sprite.x().integer() + x_speed);
-            sprite.set_y(sprite.y().integer() + y_speed);
+            sprite.set_x(sprite.x() + x_speed);
+            sprite.set_y(sprite.y() + y_speed);
             steps++;
         }
 
-        if (current_room->map[decode(
-                (sprite.x() + (x_speed / 2) + (x_speed * 4)).integer(),
-                (sprite.y() + (y_speed / 2) + (y_speed * 4)).integer())] == 1)
+        switch (type)
         {
-            x_speed = 0;
-            y_speed = 0;
-            current_room->map[decode(sprite.x().integer(), sprite.y().integer())] = 1;
-            if (steps == 1)
+        case 2:
+        {
+            if (current_room->map[decode(
+                    (sprite.x() + (x_speed / 2) + (x_speed * 96)).integer(),
+                    (sprite.y() + (y_speed / 2) + (y_speed * 96)).integer())] == 1)
             {
-                sprite.set_x(init_x);
-                sprite.set_y(init_y);
+                x_speed = 0;
+                y_speed = 0;
+                current_room->map[decode(sprite.x().integer(), sprite.y().integer())] = 1;
+                if (steps == 1)
+                {
+                    sprite.set_x(init_x);
+                    sprite.set_y(init_y);
+                }
             }
+            break;
+        }
+        default:
+        {
+            if (current_room->map[decode(
+                    (sprite.x() + (x_speed / 2) + (x_speed * 4)).integer(),
+                    (sprite.y() + (y_speed / 2) + (y_speed * 4)).integer())] == 1)
+            {
+                x_speed = 0;
+                y_speed = 0;
+                current_room->map[decode(sprite.x().integer(), sprite.y().integer())] = 1;
+                if (steps == 1)
+                {
+                    sprite.set_x(init_x);
+                    sprite.set_y(init_y);
+                }
+            }
+            break;
+        }
         }
 
         if (x_speed_prior != x_speed || y_speed_prior != y_speed)
@@ -303,7 +364,7 @@ void chari_sound(int chari, int sound)
         {
         case JASPER:
         {
-            bn::sound_items::wah_luna.play(0.5);
+            bn::sound_items::wah_jasper.play(0.5);
             break;
         }
         case XYLIA:
@@ -396,7 +457,7 @@ int linear_gameplay()
     bn::vector<bn::sprite_ptr, 128> sprites_v;
     bn::vector<Barrel, 26> sprites_b;
     bn::vector<Veggie, 2> veggies;
-    bn::vector<bn::sprite_ptr, 32> text_sprites;
+    bn::vector<bn::sprite_ptr, 28> text_sprites;
     bn::vector<bn::sprite_ptr, 4> xray_sprites;
 
     // Background stuff
@@ -411,6 +472,8 @@ int linear_gameplay()
     // Create wall tiles
     for (int i = 0; i < 135; i++)
     {
+        BN_LOG(current_room.map[i]);
+
         // Hole
         if (current_room.map[i] == -1)
         {
@@ -485,10 +548,9 @@ int linear_gameplay()
         }
         else if (current_room.map[i] == -71)
         {
-            Barrel b = Barrel(resolve_x(i), resolve_y(i), &current_room, 1);
-            sprites_b.at(i).push(0, -0.2);
-            sprites_b.push_back(b);
-            current_room.map[i] = 1;
+            sprites_b.push_back(Barrel(resolve_x(i), resolve_y(i), &current_room, 2));
+            sprites_b.at(sprites_b.size() - 1).push(0, -0.1);
+            current_room.map[i] = 0;
         }
         else if (current_room.map[i] < -16)
         {
@@ -717,6 +779,12 @@ int linear_gameplay()
                         }
                     }
                 }
+            }
+
+            // Is bullet?
+            if (bullet.visible() && distance(sprites_b.at(i).sprite, bullet) < 8 && sprites_b.at(i).type == 2)
+            {
+                bullet.set_visible(false);
             }
 
             // Update function, obviously
@@ -1184,13 +1252,18 @@ int linear_gameplay()
                     {
                         global->chari_offset = LUNA;
                     }
-                    else if (global->current_level < 12 && global->chari_offset > XYLIA)
+                    else if (global->current_level < 24 && global->chari_offset > XYLIA)
                     {
                         global->chari_offset = LUNA;
                     }
                     else if (global->chari_offset > JASPER)
                     {
                         global->chari_offset = LUNA;
+                    }
+
+                    if (global->current_level == 39 && global->chari_offset == LUNA)
+                    {
+                        global->chari_offset = XYLIA;
                     }
 
                     // If gravity, set sprite
@@ -1752,8 +1825,8 @@ int show_cutscenes(int scene)
     bool primed = false;
     char color = 0;
     bn::vector<bn::sprite_ptr, 6> tiles;
-    bn::vector<bn::sprite_ptr, 35> text_sprites1;
-    bn::vector<bn::sprite_ptr, 35> text_sprites2;
+    bn::vector<bn::sprite_ptr, 28> text_sprites1;
+    bn::vector<bn::sprite_ptr, 28> text_sprites2;
 
     // bn::music_items::bored2.play(0.5);
 
@@ -2008,6 +2081,138 @@ int show_cutscenes(int scene)
                     push_tile(cutscene36);
                     break;
                 }
+                case 37:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene37);
+                    break;
+                }
+                case 38:
+                {
+                    maxframes = 32;
+                    push_tile(cutscene38);
+                    break;
+                }
+                case 39:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene39);
+                    break;
+                }
+                case 40:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene40);
+                    break;
+                }
+                case 41:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene41);
+                    break;
+                }
+                case 42:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene42);
+                    break;
+                }
+                case 43:
+                {
+                    maxframes = 27;
+                    push_tile(cutscene43);
+                    break;
+                }
+                case 44:
+                {
+                    maxframes = 4;
+                    push_tile(cutscene44);
+                    break;
+                }
+                case 45:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene45);
+                    break;
+                }
+                case 46:
+                {
+                    maxframes = 6;
+                    push_tile(cutscene46);
+                    break;
+                }
+                case 47:
+                {
+                    maxframes = 5;
+                    push_tile(cutscene47);
+                    break;
+                }
+                case 48:
+                {
+                    maxframes = 4;
+                    push_tile(cutscene48);
+                    break;
+                }
+                case 49:
+                {
+                    maxframes = 5;
+                    push_tile(cutscene49);
+                    break;
+                }
+                case 50:
+                {
+                    maxframes = 10;
+                    push_tile(cutscene50);
+                    break;
+                }
+                case 51:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene51);
+                    break;
+                }
+                case 52:
+                {
+                    maxframes = 18;
+                    push_tile(cutscene52);
+                    break;
+                }
+                case 53:
+                {
+                    maxframes = 17;
+                    push_tile(cutscene53);
+                    break;
+                }
+                case 54:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene54);
+                    break;
+                }
+                case 55:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene55);
+                    break;
+                }
+                case 56:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene56);
+                    break;
+                }
+                case 57:
+                {
+                    maxframes = 12;
+                    push_tile(cutscene57);
+                    break;
+                }
+                case 58:
+                {
+                    maxframes = 3;
+                    push_tile(cutscene38b);
+                    break;
+                }
                 default:
                 {
                     maxframes = 30;
@@ -2112,8 +2317,8 @@ int show_cutscenes(int scene)
             if (text_sprites1.size() == 0)
             {
                 const char *base_string = (char *)resolve_dialogue(scene, pos);
-                char sent1[36] = {};
-                char sent2[35] = {};
+                char sent1[29] = {};
+                char sent2[28] = {};
 
                 color = base_string[0];
                 for (int i = 1; i < 71; i++)
@@ -2124,13 +2329,13 @@ int show_cutscenes(int scene)
                     }
                     else
                     {
-                        if (i < 36)
+                        if (i < 29)
                         {
                             sent1[i - 1] = base_string[i];
                         }
                         else
                         {
-                            sent2[i - 36] = base_string[i];
+                            sent2[i - 29] = base_string[i];
                         }
                     }
                 }
@@ -2363,6 +2568,139 @@ int show_cutscenes(int scene)
                     frame = 0;
                     pos++;
                 }
+                else if (strcmp(sent1, "S37") == 0)
+                {
+                    cutscene = 37;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S38") == 0)
+                {
+                    cutscene = 38;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S38b") == 0)
+                {
+                    cutscene = 58;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S39") == 0)
+                {
+                    cutscene = 39;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S40") == 0)
+                {
+                    cutscene = 40;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S41") == 0)
+                {
+                    cutscene = 41;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S42") == 0)
+                {
+                    cutscene = 42;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S43") == 0)
+                {
+                    bn::sound_items::pew.play(0.5);
+                    cutscene = 43;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S44") == 0)
+                {
+                    cutscene = 44;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S45") == 0)
+                {
+                    cutscene = 45;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S46") == 0)
+                {
+                    cutscene = 46;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S47") == 0)
+                {
+                    cutscene = 47;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S48") == 0)
+                {
+                    cutscene = 48;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S49") == 0)
+                {
+                    cutscene = 49;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S50") == 0)
+                {
+                    cutscene = 50;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S51") == 0)
+                {
+                    cutscene = 51;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S52") == 0)
+                {
+                    cutscene = 52;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S53") == 0)
+                {
+                    cutscene = 53;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S54") == 0)
+                {
+                    cutscene = 54;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S55") == 0)
+                {
+                    cutscene = 55;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S56") == 0)
+                {
+                    cutscene = 56;
+                    frame = 0;
+                    pos++;
+                }
+                else if (strcmp(sent1, "S57") == 0)
+                {
+                    cutscene = 57;
+                    frame = 0;
+                    pos++;
+                }
                 else if (strcmp(sent1, "M_KILL") == 0)
                 {
                     music_stop();
@@ -2533,7 +2871,7 @@ int mainmenu()
 
 int text_demo()
 {
-    bn::vector<bn::sprite_ptr, 64> text;
+    bn::vector<bn::sprite_ptr, 28> text;
 
     int start_x = 100;
     int start_y = 0;
@@ -2578,7 +2916,7 @@ int grid_minigame(int level = 0)
 {
     const int size = 5;
     bn::vector<bn::sprite_ptr, size * size> tiles;
-    bn::vector<bn::sprite_ptr, 32> text_sprites;
+    bn::vector<bn::sprite_ptr, 28> text_sprites;
     bn::sprite_ptr button = bn::sprite_items::buttons.create_sprite(-8 * 16, 72, 1);
     bn::regular_bg_ptr bg_door = bn::regular_bg_items::bg_door.create_bg(0, 0);
     int ref[size * size] = {0};
@@ -2594,6 +2932,58 @@ int grid_minigame(int level = 0)
 
     switch (level)
     {
+    case 4:
+    {
+        ref[0] = 1;
+        ref[1] = 1;
+        ref[2] = 1;
+        ref[3] = 1;
+        ref[4] = 1;
+        ref[5] = 1;
+        ref[6] = 1;
+        ref[7] = 1;
+        ref[8] = 1;
+        ref[9] = 1;
+        ref[15] = 1;
+        ref[16] = 1;
+        ref[17] = 1;
+        ref[18] = 1;
+        ref[19] = 1;
+        ref[20] = 1;
+        ref[21] = 1;
+        ref[22] = 1;
+        ref[23] = 1;
+        ref[24] = 1;
+        break;
+    }
+    case 3:
+    {
+        ref[0] = 1;
+        ref[4] = 1;
+        ref[6] = 1;
+        ref[8] = 1;
+        ref[16] = 1;
+        ref[18] = 1;
+        ref[20] = 1;
+        ref[24] = 1;
+        break;
+    }
+    case 2:
+    {
+        ref[1] = 1;
+        ref[3] = 1;
+        ref[5] = 1;
+        ref[6] = 1;
+        ref[8] = 1;
+        ref[9] = 1;
+        ref[15] = 1;
+        ref[16] = 1;
+        ref[18] = 1;
+        ref[19] = 1;
+        ref[21] = 1;
+        ref[23] = 1;
+        break;
+    }
     case 1:
     {
         ref[0] = 1;
@@ -2777,109 +3167,146 @@ int main()
         0}; // current character
     global = &global_instance;
 
-    // text_demo();
-
-    // intro();
-    // mainmenu();
+    intro();
+    mainmenu();
 
     music_stop();
-
-    global->current_level = 31;
-
-    if (0 == 1)
+    // CHAPTER ONE
+    bn::music_items::bored.play(0.6);
+    show_cutscenes(2);
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 6)
     {
-        // CHAPTER ONE
-        bn::music_items::bored.play(0.6);
-        show_cutscenes(2);
-        bn::music_items::harp.play(0.5);
-        while (global->current_level < 6)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level += linear_gameplay();
-        }
-        music_stop();
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    music_stop();
 
-        // CHAPTER TWO
-        bn::music_items::bored2.play(0.6);
-        show_cutscenes(3);
-        bn::music_items::harp.play(0.5);
-        while (global->current_level < 12)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level += linear_gameplay();
-        }
-        music_stop();
+    // CHAPTER TWO
+    bn::music_items::bored2.play(0.6);
+    show_cutscenes(3);
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 12)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    music_stop();
 
-        // CHAPTER THREE
-        bn::music_items::bored2.play(0.6);
-        show_cutscenes(5);
-        bn::music_items::harp.play(0.5);
-        while (global->current_level < 18)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level += linear_gameplay();
-        }
-        music_stop();
+    // CHAPTER THREE
+    bn::music_items::bored2.play(0.6);
+    show_cutscenes(5);
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 18)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    music_stop();
 
-        // Boss fight 1
-        bn::music_items::boss.play(0.6);
-        show_cutscenes(6);
-        while (global->current_level < 19)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level = 19;
-            global->current_level += linear_gameplay();
-        }
-        music_stop();
+    // Boss fight 1
+    bn::music_items::boss.play(0.6);
+    show_cutscenes(6);
+    while (global->current_level < 19)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level = 19;
+        global->current_level += linear_gameplay();
+    }
+    music_stop();
 
-        // CHAPTER FOUR
-        bn::music_items::bored2.play(0.6);
-        show_cutscenes(7);
-        bn::music_items::harp.play(0.5);
-        while (global->current_level < 24)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level += linear_gameplay();
-        }
-        music_stop();
+    // CHAPTER FOUR
+    bn::music_items::bored2.play(0.6);
+    show_cutscenes(7);
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 24)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    music_stop();
 
-        // CHAPTER FIVE
-        bn::music_items::bored2.play(0.6);
-        show_cutscenes(8);
-        bn::music_items::harp.play(0.5);
-        while (global->current_level < 28)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level += linear_gameplay();
-        }
-        grid_minigame(1);
-        while (global->current_level < 31)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level += linear_gameplay();
-        }
-        grid_minigame(0);
-        music_stop();
+    // CHAPTER FIVE
+    bn::music_items::bored2.play(0.6);
+    show_cutscenes(8);
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 28)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    grid_minigame(1);
+    while (global->current_level < 31)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    grid_minigame(0);
+    music_stop();
 
-        // BOSS 2
-        bn::music_items::boss.play(0.6);
-        while (global->current_level < 32)
-        {
-            bn::sound_items::alert.play(0.5);
-            global->current_level += linear_gameplay();
-        }
-        music_stop();
+    // BOSS 2
+    bn::music_items::boss.play(0.6);
+    while (global->current_level < 32)
+    {
+        bn::sound_items::alert.play(0.5);
+        global->current_level += linear_gameplay();
+    }
+    music_stop();
+
+    // CHAPTER SIX
+    bn::music_items::bored2.play(0.5);
+    music_stop();
+    show_cutscenes(12);
+    bn::music_items::harp.play(0.5);
+    while (global->current_level < 34)
+    {
+        global->current_level += linear_gameplay();
+    }
+    grid_minigame(2);
+    while (global->current_level < 36)
+    {
+        global->current_level += linear_gameplay();
+    }
+    grid_minigame(3);
+    music_stop();
+
+    // CHAPTER SEVEN
+    bn::music_items::bored.play(0.5);
+    show_cutscenes(13);
+    bn::music_items::harp.play(0.5);
+    music_stop();
+    while (global->current_level < 38)
+    {
+        global->current_level += linear_gameplay();
+    }
+    music_stop();
+    grid_minigame(4);
+
+    bn::music_items::boss.play(0.5);
+    while (global->current_level < 39)
+    {
+        global->current_level += linear_gameplay();
+    }
+    show_cutscenes(14);
+    global->chari_offset = XYLIA;
+    while (global->current_level < 40)
+    {
+        global->current_level += linear_gameplay();
     }
 
-    if (1 == 1)
-    {
-        global->current_level = 32;
-        linear_gameplay();
-    }
+    music_stop();
+    bn::music_items::bored.play(0.5);
+    show_cutscenes(15);
 
-    // Fallback so it doesn't up and crash
-    bn::regular_bg_ptr bg_message = bn::regular_bg_items::bg_message.create_bg(0, 0);
+    // Credits
     bn::music_items::anata.play(0.5);
+    bn::regular_bg_ptr bg_message = bn::regular_bg_items::bg_message.create_bg(0, 0);
+    while (!bn::keypad::a_released())
+    {
+        bn::core::update();
+    }
+    bn::sound_items::pew.play();
+    bg_message = bn::regular_bg_items::bg_message2.create_bg(0, 0);
     while (true)
     {
         bn::core::update();

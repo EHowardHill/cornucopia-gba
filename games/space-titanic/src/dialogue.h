@@ -31,59 +31,60 @@ int strcmp(const char *p1, const char *p2)
     return c1 - c2;
 }
 
-const char d_messages[][32] = {
+const char d_messages[][28] = {
     "Push wooden crate",
     "Break rotten crate",
     "Reset tiles"};
 
-const char d_intro_01[][32] = {
+const char d_intro_01[][28] = {
     "Okay.. Gravity is out.",
     "Escaping won't be easy,",
-    "but I'm sure I can find a way",
-    "using those crates.",
+    "but I'm sure I can find a",
+    "way using those crates.",
     "$"};
 
-const char d_intro_02[][32] = {
+const char d_intro_02[][28] = {
     "FEATURE UNLOCKED:",
-    "You can now play as Xylia!",
-    "Press either trigger to swap",
-    "characters and tap the B button",
-    "to use their unique ability.",
+    "You can play as Xylia!",
+    "Press the triggers to swap",
+    "Tap the B button to use",
+    "their unique abilities.",
     "$"};
 
-const char d_journal01[][81] = {
+const char d_journal01[][57] = {
     " S01",
-    "0Dear diary, first day as a securityguard is finally over!",
-    "0AAA Security put me on this cruise-liner called the 'Cornucopia'.",
-    "0All the passengers are Vegginians, and they are SO chill!",
+    "0Dear diary, first day as a  security guard is over!",
+    "0AAA Security put me on this ship called the Cornucopia.",
+    "0It's a Vegginian ship, and  they are SO chill!",
     " S02",
-    "0It would be boring, but I convincedXylia to come along.",
-    "0Her parents bought her a ticket so we're sharing a cabin.",
-    "0She, uh.. doesn't like it when her parents buy her stuff,",
+    "0It would be boring, but I   got Xylia to come along.",
+    "0Her parents bought her a    ticket, and uh..",
+    "0She doesn't like it when herparents buy her stuff,",
     " S03",
-    "0but she's been quiet about it.",
+    "0but she's been really quiet about it.",
     " S02",
-    "0We spent most of the day playing   shuffleboard with the Vegginians",
-    "0and my coworker, Jasper.           Jasper seems cool.",
-    "0Does he think Xylia is cute?       Only time will tell.",
+    "0We spent most of the day    playing shuffleboard with",
+    "0the Vegginians and my       coworker, Jasper.",
+    "0Jasper kept trying to be    smooth with Xylia.",
+    "0Does he think she's cute?   Only time will tell.",
     " S04",
-    "0He made this little robot named    KAM, I think. It's pretty smart.",
-    "0I have no idea why he's in securityif  he likes making robots so much,",
-    "0but it's whatever.                 So excited for tomorrow!",
+    "0He made this smart little   robot named KAM.",
+    "0I have no idea why he's in  security if he likes making",
+    "0robots so much. Anyway, I'm so excited for tomorrow!",
     " S03",
-    "1Hope you're not writing anything inthere you want to keep secret.",
+    "1Hope there's nothing secret in there.",
     " S00",
     "0How come?",
-    "1You mumbled the whole thing out    loud as you were writing.",
+    "1You mumbled the whole thing aloud, you know.",
     " S02",
     "0Oh.. hehe.",
     " S00",
-    "1Didn't you say that Jasper wanted  to go out to get a snack?",
+    "1Didn't you say Jasper wantedto go out to get a snack?",
     " S02",
-    "0Oh, you two go ahead and have fun, I have to catch up on my daily report.",
+    "0You two go ahead, I have to write my daily report.",
     " S05",
     "1Alright, then.",
-    "1I can hear you giggling from all   the way over here.",
+    "1I can hear you giggling fromway over here.",
     " S06",
     "0I'm not, I'm not.",
     "1Luna, I don't believe you.",
@@ -94,58 +95,59 @@ const char d_journal01[][81] = {
     " S08",
     " M_KILL",
     "...uggggggh",
-    "0How long has it been? It is time tosee how Jasper and Xylia are doing?",
+    "0Welp, seems like high time  to check on the lovebirds.",
     " S09",
-    "Ehh.. I'm sure they're fine.",
+    "..Eh, I'm sure they're fine.",
     " S10",
     "...",
     " S11",
-    "0What the-                          Who turned the gravity off?",
-    "0I guess it's, uh.. It's REALLY     time to check on the others.",
+    "0What the-                   Who turned the gravity off?",
+    "0I guess it's REALLY time to check on the others.",
     " $"};
 
-const char d_journal02[][81] = {
+const char d_journal02[][57] = {
     " S12",
     "0Xylia!! Are you okay??",
-    "1Luna. Guess what I figured out.",
+    "1Luna. Guess what.",
     " S13",
     "0What is it?",
     " S14",
-    "1That Jasper guy?                   He doesn't work for AAA Security.",
-    "1He's a fraud, and I think he's     behind the gravity outage.",
-    "1I hate zero gravity. HAAAATEEE it.",
-    "1He claims that he's off to fix the gravity with that robot of his.",
-    "1But he's already lied to us once.  Luna, tell me I'm not crazy.",
+    "1That Jasper guy? He doesn't work for AAA Security.",
+    "1Luna, I think he's behind   the gravity outage.",
+    "1That dirty rat... Ugh,      I HATE this.",
+    "1He claims he's going to fix the gravity his robot.",
+    "1He's already lied. Luna,    tell me I'm not crazy.",
     " S15",
     "0No, no you're not crazy.",
     " S16",
-    "1(Dangit, they woulda been so cute)",
+    "1(Dangit, they woulda been socute together)",
     " $"};
 
-const char d_journal03[][81] = {
+const char d_journal03[][57] = {
     " S17",
-    "1Step away from the controls,       Jasper!",
+    "1Step away from the controls,Jasper!",
     " S18",
-    "2Uh.. KAM and I almost got the      gravity back.",
+    "2Uh.. KAM and I almost got   the gravity back.",
     " S17",
-    "0Jasper, stand down, or I'll be     forced to use my stun ray.",
+    "0Jasper, stand down, or I'll use my stun ray.",
     " S18",
-    "2Wait.. Do you think this is MY     fault?",
+    "2Wait.. Do you think this is MY fault?",
     " S19",
     " M_KILL",
     " ...",
     "0Xylia!?",
     " S21",
-    "1Oh, please. You weren't going to   fire that stun gun.",
+    "1Oh, please. You weren't     going to use this.",
     " S20",
     "0...I might have!",
     " S22",
-    "3Good going, numbskulls. You've     damaged the computer even more.",
+    "3Good going, numbskulls. Now it's even MORE broken.",
     " S23",
     " M_ANATA",
-    "0So, if you're not with us.. who AREyou two?",
+    "0So, if you're not with us.. who ARE you two?",
     " S22",
-    "3Stowaways, but we're not malicious.Why would WE turn off the gravity?",
+    "3Stowaways, but we're not    malicious.",
+    "3What would WE get from      turning off the gravity?",
     " S24",
     "1I don't know - you tell me.",
     " S25",
@@ -156,72 +158,73 @@ const char d_journal03[][81] = {
     " S21",
     "1Sorry, I couldn't help it.",
     " S23",
-    "0KAM, do you think you can try to   get the gravity back on?",
+    "0KAM, what do we need to do?",
     " S22",
-    "3Electronics don't tend to work     after you shoot them.",
-    "3Why don't you two look for some    replacement parts?",
+    "3Electronics don't tend to   work after you shoot them.",
+    "3Why don't you two look for  some replacement parts?",
     " S23",
-    "0Sure thing. We'll.. uh.. be back.",
+    "0Sure thing. We'll.. uh..    We'll be back.",
     " $"};
 
-const char d_journal04[][81] = {
+const char d_journal04[][57] = {
     " S28",
-    "3You're too late, humans! Tonight,  we feast on Vegginians!",
+    "3You're too late, humans!",
+    "3Tonight,                    we feast on Vegginians!",
     " S17",
     "0Vegons! I should have known!",
     " S27",
-    "1Is that the species with the reallybad poetry?",
+    "1Is that the species with thereally bad poetry?",
     " S29",
     "2No, those are humans.",
     " S27",
-    "1Look, do you want us to save you ornot?",
+    "1Look, do you want us to saveyou or not?",
     " S17",
     "0Don't be afraid, Vegginian! Help ison the way!",
     " $"};
 
-const char d_journal05[][81] = {
+const char d_journal05[][57] = {
     " S30",
     "0...",
     "0Mr. Tomato! Are you okay?",
     " S31",
-    "2Absolutely steamed! Clearly, one   security guard was not enough.",
+    "2Absolutely steamed! One     guard was not enough.",
     "2We needed at least three.",
     " S32",
     "0What are we going to do?",
     " S31",
-    "2Young lady, you are the security   guard.",
-    "2You're the only one qualified to   handle this situation.",
+    "2Young lady, you are the     security guard.",
+    "2You are the only one who canhandle this situation.",
     " S32",
-    "0Oh... right. Well, we're trying to get the gravity back on.",
+    "0Oh..  Well, we're trying to get the gravity back on.",
     " S31",
-    "2Well, hurry up, then!",
+    "2Hurry up, then!",
     " $"};
 
-const char d_journal06[][81] = {
+const char d_journal06[][57] = {
     " S33",
-    "0Finally! There it is! Time to get  it back to Jasper.",
+    "0Finally! There it is! Time  to get back to Jasper.",
     " S34",
-    "2Looks like the installation was a  success! Gravity is back... here.",
-    "2Now we just need to get to the     other control panel.",
-    "2Half the ship is still out of      gravity.",
+    "2Looks like the installation was a success!",
+    "2Now we just need to get to  the other control panel.",
+    "2Half the ship is still out  of gravity.",
     "2(Despite your best efforts.)",
     " S35",
-    "1Hey! How was I supposed to know    Vegons were on board?",
+    "1Hey! How was I supposed to  know it was Vegons?",
     " S36",
-    "0We'll escort you. We should get    everything back in no time!",
+    "0We'll escort you. Everythingwill be back in no time!",
     " S35",
-    "1Ugh, do we have to bring Jasper?",
+    "1Ugh, do we have to bring    Jasper?",
     " $"};
 
-const char d_intro_03[][32] = {
+const char d_intro_03[][28] = {
     "FEATURE UNLOCKED:",
-    "You can now play as Jasper!",
-    "Press either trigger to swap",
-    "characters and tap the B button",
-    "to use their unique ability.",
+    "You can play as Jasper!",
+    "Press the triggers to swap",
+    "Tap the B button to use",
+    "their unique abilities.",
     "$"};
 
-const char d_intro_04[][32] = {
+const char d_intro_04[][28] = {
     "WARNING: SATELLITE DETECTED",
     "Jasper's third eye is very",
     "sensitive, and it may get",
@@ -229,70 +232,116 @@ const char d_intro_04[][32] = {
     "range of the satellite!",
     "$"};
 
-const char d_boss02[][32] = {
+const char d_boss02[][28] = {
     "Ugh! Out of gravity range,",
     "And now another Vegon?",
-    "This better go quick."};
+    "This better go quick.",
+    "$"};
 
-const char d_journal07[][81] = {
-    "2Am I crazy for thinking this is    kind of fun?",
-    "0I'll admit, I didn't expect this   trip to be so exciting.",
-    "1Tell me, are you stowing away for  the adventure,",
-    "1Or are you just poor?",
-    "0Xylia! Be nice!",
-    "2Both.",
-    "1That sounds nice. No image to keep up, no one telling you what to do.",
-    "2The freedom is nice. Being hungry  all the time is not.",
-    "2I grew up in the space circus, you know.",
-    "0No way! I wonder if Xylia and I sawyou at some point. What did you do?",
-    "2I ran the lightboard and did       repairs.",
-    "1Last time I went to the circus, theflashing lights made me queasy.",
-    "1So I guess we're even."
-    "2Nah. It'd have to happen twice for us to be even.",
-    " $"};
-
-const char d_journal08[][81] = {
-    "0So how many of you ARE there?",
+const char d_journal07[][57] = {
+    " S42",
+    "0So how many of you even     ARE there?",
+    " S28",
     "3Enough to defeat you three!",
+    " S42",
     "1Stand down, Vegon!",
+    " S43",
     "0Jasper!",
-    "2What? She was hesitating too long!",
-    "0I was right about to shoot!        Promise!"
+    "0I was right about to shoot! Promise!",
+    " S44",
+    "2Hey, I'm sure there's more.",
     " $"};
 
-/*
-const char d_journal09[][81] = {
-    "0It's over, Vegons! Surrender now, or else!",
-    "3Or else what?",
-    "1C'mon, Luna.",
-    "2Shoot him already!",
-    "0I'm aiming! Gimme a moment!"
-    "3Bad move."
-}
+const char d_journal08[][57] = {
+    " S38",
+    "2Am I crazy for thinking thisis kind of fun?",
+    " S39",
+    "1I'll admit, I didn't expect this trip to be exciting.",
+    " S41",
+    "1Tell me, are you stowing    away for the adventure,",
+    "1Or are you just poor?",
+    " S40",
+    "0Xylia! Be nice!",
+    " S38b",
+    "2Both.",
+    " S39",
+    "1That sounds nice. No image  to keep up.",
+    "1No one telling you what you can and can't do.",
+    " S38b",
+    "2The freedom is nice. Being  hungry all the time is not.",
+    "2I grew up in the space      circus, you know.",
+    " S39",
+    "1Huh.. I wonder if Luna and Iever saw you.",
+    "1What did you do?",
+    " S38b",
+    "2I ran the electronics and   did repairs.",
+    " S39",
+    "1Last time I went to the     circus, you know,",
+    "1The flashing lights made me queasy.",
+    "1So I guess we're even.",
+    " S38b",
+    "2Nah. It'd have to happen    twice for us to be even.",
+    " S39",
+    "1Grrr...",
+    " $"};
 
-const char d_journal10[][81] = {
+const char d_journal09[][57] = {
+    " S42",
+    "0It's over, Vegons!          Surrender now, or else!",
+    " S28",
+    "3Or else what?",
+    " S46",
+    "1C'mon, Luna.",
+    " S47",
+    "2Shoot him already!",
+    " S48",
+    "0I'm aiming! Gimme a moment!",
+    " S57",
+    "3Bad move, security guard!",
+    " $"};
+
+const char d_journal10[][57] = {
+    " S49",
     "1Luna? Are you okay?",
     "0...Ow.",
-    "2Yeah, that stun beam hurts, huh.",
-    "0..I really sorry, guys.            ",
-    "0I.. I failed you. I'm not good enough to be",
+    "2(Yeah, that stun beam hurts, huh.)",
+    " S50",
+    "0..I really sorry, guys.",
+    "0I.. I failed you. I'm not   good enough to be",
     "0a security guard.",
-    "0It's all done, isn't it? The Vegons are in jail, the Vegginians are happy, and I'm getting paid.",
-    "2This is where I hitch a ride on the next spaceship. I'll admit though, I'm gonna miss you guys.",
-    "1Hey.. When can I see you again?",
-    "0This is stupid. Why don't we three sail off together? We're all adults here, we can do what we want.",
+    " S51",
+    "2Oh come on, you could have  got that Vegon first time,",
+    "2You just hesitated a little too long.",
+    "1Luna, it was really hard    without you.",
+    " S52",
+    "0SEVERAL DAYS LATER",
+    "0Well... that's that.",
+    " S53",
+    "0It's all done, isn't it? TheVegons are off to jail,",
+    "0the Vegginians are happy,   and I'm getting paid.",
+    " S55",
+    "2This is where I hitch a rideon the next spaceship.",
+    "2I'll admit though, I'm gonnamiss you guys.",
+    " S54",
+    "1Hey.. When can I see you    again?",
+    " S56",
+    "0This is stupid. Why don't wethree sail off together?",
+    "0We're all adults here, we   can do what we want.",
+    " S54",
     "1What about your job?",
+    " S56",
     "0What about your lack of one?",
+    " S54",
     "1...Touché.",
+    " S55",
     "2I guess it's settled, then. Off to the next adventure?",
+    " S56",
     "0Yeah!",
-    " $"
-}
-*/
+    " $"};
 
-const char d_credits[][32] = {
+const char d_credits[][56] = {
     "CORNUCOPIA",
-    "Character design: Madelyn Watts",
+    "Character design:           Madelyn Watts",
     "Kickstarter backers",
     " $"};
 
@@ -354,6 +403,28 @@ resolve_dialogue(int requested_dialogue, int position = 0)
     case 11:
     {
         return &d_boss02[position];
+        break;
+    }
+
+    // final bit
+    case 12:
+    {
+        return &d_journal07[position];
+        break;
+    }
+    case 13:
+    {
+        return &d_journal08[position];
+        break;
+    }
+    case 14:
+    {
+        return &d_journal09[position];
+        break;
+    }
+    case 15:
+    {
+        return &d_journal10[position];
         break;
     }
     default:
