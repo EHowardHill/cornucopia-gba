@@ -115,7 +115,7 @@ const char d_journal02[][57] = {
     "1That Jasper guy? He doesn't work for AAA Security.",
     "1Luna, I think he's behind   the gravity outage.",
     "1That dirty rat... Ugh,      I HATE this.",
-    "1He claims he's going to fix the gravity his robot.",
+    "1He claims he's going to fix the gravity with his robot.",
     "1He's already lied. Luna,    tell me I'm not crazy.",
     " S15",
     "0No, no you're not crazy.",
@@ -179,7 +179,7 @@ const char d_journal04[][57] = {
     " S27",
     "1Look, do you want us to saveyou or not?",
     " S17",
-    "0Don't be afraid, Vegginian! Help ison the way!",
+    "0Don't be afraid, Vegginian! Help is on the way!",
     " $"};
 
 const char d_journal05[][57] = {
