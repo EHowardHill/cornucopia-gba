@@ -161,11 +161,6 @@ inline void music_stop()
         bn::music::stop();
 }
 
-const int D_LEFT = 1;
-const int D_RIGHT = 2;
-const int D_UP = 3;
-const int D_DOWN = 4;
-
 const int LUNA = 0;
 const int XYLIA = 13;
 const int JASPER = 26;
@@ -187,11 +182,12 @@ struct global_data
 };
 global_data *global;
 
-class crate
+class Crate
 {
     int steps = 0;
     bn::fixed x_speed = 0;
     bn::fixed y_speed = 0;
+	bool freed;
 
 public:
     bn::sprite_ptr sprite = bn::sprite_items::items.create_sprite(0, 0, 1);
@@ -199,8 +195,9 @@ public:
     int state = 0;
     Room *current_room;
 
-    crate(int x, int y, Room *new_level, int new_type = 0)
+    Crate(int x, int y, Room *new_level, int new_type = 0)
     {
+	    freed = false;
         current_room = new_level;
         current_room->map[decode(x, y)] = 1;
         type = new_type;
@@ -220,6 +217,15 @@ public:
         }
         }
     }
+
+	void free() {
+		freed = true;
+		sprite.set_visible(false);
+	}
+
+	bool isFree() {
+		return freed;
+	}
 
     // poosh
     void push(bn::fixed x, bn::fixed y)
@@ -261,6 +267,8 @@ public:
         bn::fixed init_y = sprite.y();
         bn::fixed x_speed_prior = x_speed;
         bn::fixed y_speed_prior = y_speed;
+
+        if (freed) return;
 
         if (x_speed != 0 || y_speed != 0)
         {
@@ -413,6 +421,50 @@ int intro()
 
 int linear_gameplay()
 {
+	// `struct` makes it a scoped enum.
+	enum class Freefall {
+		D_STOP,
+		D_LEFT,
+		D_RIGHT,
+		D_UP,
+		D_DOWN,
+	};
+    // So we don't have to write `Freefall::D_LEFT`.
+	using enum Freefall;
+
+    struct CrateAction {
+	    Crate *crate;
+        int x;
+        int y;
+    };
+
+    class CrateActionQueue {
+	    // Max of four crates can ever surround the player.
+	    CrateAction actions[4];
+	    unsigned char length = 0;
+	    const unsigned char maxLength = 4;
+    public:
+        void push(Crate *crate, int x, int y)
+        {
+            CrateAction action;
+            action.crate = crate;
+            action.x = x;
+            action.y = y;
+            // If it fails, oh well.
+            if (length < maxLength) {
+                actions[length] = action;
+                length++;
+            }
+        }
+        void performAllActions() {
+            for (auto i = length - 1; i >= 0; --i) {
+	            auto crateAction = actions[i];
+	            crateAction.crate->push(crateAction.x, crateAction.y);
+            }
+            length = 0;
+        }
+    };
+
     // Set up world
     Room current_room;
     current_room.setup(global->current_level);
@@ -421,7 +473,8 @@ int linear_gameplay()
     bool indicate = false;
     int pros_x = current_room.start_x;
     int pros_y = current_room.start_y;
-    int freefall = 0;
+    Freefall freefall = D_STOP;
+    CrateActionQueue crateActionQueue;
     int rotate = 90;
     int dead = 0;
     int orientation = 0;
@@ -455,7 +508,7 @@ int linear_gameplay()
 
     // Set up vectors
     bn::vector<bn::sprite_ptr, 128> sprites_v;
-    bn::vector<crate, 26> sprites_b;
+    bn::vector<Crate, 26> sprites_b;
     bn::vector<Veggie, 2> veggies;
     bn::vector<bn::sprite_ptr, 28> text_sprites;
     bn::vector<bn::sprite_ptr, 4> xray_sprites;
@@ -484,12 +537,12 @@ int linear_gameplay()
         // crate
         else if (current_room.map[i] == -2)
         {
-            sprites_b.push_back(crate(resolve_x(i), resolve_y(i), &current_room));
+            sprites_b.push_back(Crate(resolve_x(i), resolve_y(i), &current_room));
             current_room.map[i] = 1;
         }
         else if (current_room.map[i] == -3)
         {
-            sprites_b.push_back(crate(resolve_x(i), resolve_y(i), &current_room, 1));
+            sprites_b.push_back(Crate(resolve_x(i), resolve_y(i), &current_room, 1));
             current_room.map[i] = 1;
         }
         // Special items
@@ -548,7 +601,7 @@ int linear_gameplay()
         }
         else if (current_room.map[i] == -71)
         {
-            sprites_b.push_back(crate(resolve_x(i), resolve_y(i), &current_room, 2));
+            sprites_b.push_back(Crate(resolve_x(i), resolve_y(i), &current_room, 2));
             sprites_b.at(sprites_b.size() - 1).push(0, -0.1);
             current_room.map[i] = 0;
         }
@@ -639,6 +692,7 @@ int linear_gameplay()
         // Handle crates
         for (int i = 0; i < sprites_b.size(); i++)
         {
+	        if (sprites_b.at(i).isFree()) continue;
             if (sprites_b.at(i).sprite.y().integer() == pros_y)
             {
                 if (sprites_b.at(i).sprite.x().integer() == pros_x - 16)
@@ -665,15 +719,8 @@ int linear_gameplay()
                             freefall = D_RIGHT;
                             bn::sound_items::box_03.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!current_room.gravity)
-                            {
-                                sprites_b.at(i).push(-2, 0);
-                            }
                         }
-                        else
-                        {
-                            sprites_b.at(i).push(-2, 0);
-                        }
+                        crateActionQueue.push(&sprites_b.at(i), -2, 0);
                     }
                 }
                 else if (sprites_b.at(i).sprite.x().integer() == pros_x + 16)
@@ -699,15 +746,8 @@ int linear_gameplay()
                             freefall = D_LEFT;
                             bn::sound_items::box_03.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!current_room.gravity)
-                            {
-                                sprites_b.at(i).push(2, 0);
-                            }
                         }
-                        else
-                        {
-                            sprites_b.at(i).push(2, 0);
-                        }
+                        crateActionQueue.push(&sprites_b.at(i), 2, 0);
                     }
                 }
             }
@@ -736,15 +776,8 @@ int linear_gameplay()
                             freefall = D_DOWN;
                             bn::sound_items::box_03.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!current_room.gravity)
-                            {
-                                sprites_b.at(i).push(0, -2);
-                            }
                         }
-                        else
-                        {
-                            sprites_b.at(i).push(0, -2);
-                        }
+                        crateActionQueue.push(&sprites_b.at(i), 0, -2);
                     }
                 }
                 else if (sprites_b.at(i).sprite.y().integer() == pros_y + 16)
@@ -770,15 +803,8 @@ int linear_gameplay()
                             freefall = D_UP;
                             bn::sound_items::box_03.play(0.5);
                             chari_sound(global->chari_offset, 1);
-                            if (!current_room.gravity)
-                            {
-                                sprites_b.at(i).push(0, 2);
-                            }
                         }
-                        else
-                        {
-                            sprites_b.at(i).push(0, 2);
-                        }
+                        crateActionQueue.push(&sprites_b.at(i), 0, 2);
                     }
                 }
             }
@@ -795,7 +821,7 @@ int linear_gameplay()
             // Delete if it leaves the world
             if (escape(sprites_b.at(i).sprite.x().integer(), sprites_b.at(i).sprite.y().integer()))
             {
-                sprites_b.erase(&sprites_b.at(i));
+	            sprites_b.at(i).free();
             }
         }
 
@@ -1111,6 +1137,7 @@ int linear_gameplay()
                     {
                         for (int i = 0; i < sprites_b.size(); i++)
                         {
+	                        if (sprites_b.at(i).isFree()) continue;
                             if (sprites_b.at(i).type == 1 && distance(sprites_b.at(i).sprite, bullet) < 18)
                             {
                                 sprites_b.at(i).push(0, 0);
@@ -1344,6 +1371,9 @@ int linear_gameplay()
                             }
                         }
 
+                        // Move crates.
+                        crateActionQueue.performAllActions();
+
                         // When current_room.gravity is activated
                         if (current_room.gravity)
                         {
@@ -1424,7 +1454,7 @@ int linear_gameplay()
 
                             // No current_room.gravity, but stable
                         }
-                        else if (freefall == 0)
+                        else if (freefall == D_STOP)
                         {
 
                             int is_held = 0;
@@ -1546,7 +1576,7 @@ int linear_gameplay()
                                 }
                                 else
                                 {
-                                    freefall = 0;
+                                    freefall = D_STOP;
                                     rotate = 0;
                                     bn::sound_items::box_01.play(0.5);
                                 }
@@ -1565,7 +1595,7 @@ int linear_gameplay()
                                 }
                                 else
                                 {
-                                    freefall = 0;
+                                    freefall = D_STOP;
                                     rotate = 180;
                                     bn::sound_items::box_01.play(0.5);
                                 }
@@ -1584,7 +1614,7 @@ int linear_gameplay()
                                 }
                                 else
                                 {
-                                    freefall = 0;
+                                    freefall = D_STOP;
                                     rotate = 270;
                                     bn::sound_items::box_01.play(0.5);
                                 }
@@ -1603,7 +1633,7 @@ int linear_gameplay()
                                 }
                                 else
                                 {
-                                    freefall = 0;
+                                    freefall = D_STOP;
                                     rotate = 90;
                                     bn::sound_items::box_01.play(0.5);
                                 }
