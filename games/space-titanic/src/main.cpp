@@ -220,6 +220,7 @@ public:
 
 	void free() {
 		freed = true;
+		sprite.set_visible(false);
 	}
 
 	bool isFree() {
