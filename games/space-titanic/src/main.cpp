@@ -192,6 +192,7 @@ class crate
     int steps = 0;
     bn::fixed x_speed = 0;
     bn::fixed y_speed = 0;
+	bool freed;
 
 public:
     bn::sprite_ptr sprite = bn::sprite_items::items.create_sprite(0, 0, 1);
@@ -201,6 +202,7 @@ public:
 
     crate(int x, int y, Room *new_level, int new_type = 0)
     {
+	    freed = false;
         current_room = new_level;
         current_room->map[decode(x, y)] = 1;
         type = new_type;
@@ -220,6 +222,14 @@ public:
         }
         }
     }
+
+	void free() {
+		freed = true;
+	}
+
+	bool isFree() {
+		return freed;
+	}
 
     // poosh
     void push(bn::fixed x, bn::fixed y)
@@ -261,6 +271,8 @@ public:
         bn::fixed init_y = sprite.y();
         bn::fixed x_speed_prior = x_speed;
         bn::fixed y_speed_prior = y_speed;
+
+        if (freed) return;
 
         if (x_speed != 0 || y_speed != 0)
         {
@@ -639,6 +651,7 @@ int linear_gameplay()
         // Handle crates
         for (int i = 0; i < sprites_b.size(); i++)
         {
+	        if (sprites_b.at(i).isFree()) continue;
             if (sprites_b.at(i).sprite.y().integer() == pros_y)
             {
                 if (sprites_b.at(i).sprite.x().integer() == pros_x - 16)
@@ -795,7 +808,7 @@ int linear_gameplay()
             // Delete if it leaves the world
             if (escape(sprites_b.at(i).sprite.x().integer(), sprites_b.at(i).sprite.y().integer()))
             {
-                sprites_b.erase(&sprites_b.at(i));
+	            sprites_b.at(i).free();
             }
         }
 
@@ -1111,6 +1124,7 @@ int linear_gameplay()
                     {
                         for (int i = 0; i < sprites_b.size(); i++)
                         {
+	                        if (sprites_b.at(i).isFree()) continue;
                             if (sprites_b.at(i).type == 1 && distance(sprites_b.at(i).sprite, bullet) < 18)
                             {
                                 sprites_b.at(i).push(0, 0);
