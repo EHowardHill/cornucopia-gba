@@ -313,6 +313,11 @@ const char d_journal10[][57] = {
     "2Oh come on, you could have  got that Vegon first time,",
     "2You just hesitated a little too long.",
     "1Luna, it was really hard    without you.",
+    " S58",
+    "0...",
+    "1I can't breathe, Luna.",
+    "0(...Thank you guys.)",
+    "1No problem, but I eventuallyneed to breathe.",
     " S52",
     "0SEVERAL DAYS LATER",
     "0Well... that's that.",
@@ -337,12 +342,6 @@ const char d_journal10[][57] = {
     "2I guess it's settled, then. Off to the next adventure?",
     " S56",
     "0Yeah!",
-    " $"};
-
-const char d_credits[][56] = {
-    "CORNUCOPIA",
-    "Character design:           Madelyn Watts",
-    "Kickstarter backers",
     " $"};
 
 void const *

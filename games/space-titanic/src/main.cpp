@@ -1,5 +1,6 @@
 /*
     Cornucopia, by Ethan Hill
+    Joey Hurguth tweaked some bits and made it more fun though
 
     License for Butano:
 
@@ -10,6 +11,7 @@
 // Butano libraries
 #include "bn_core.h"
 #include "bn_log.h"
+#include "bn_sram.h"
 #include "bn_music.h"
 #include "bn_music_actions.h"
 #include "bn_music_items.h"
@@ -124,6 +126,7 @@
 #include "bn_sprite_items_cutscene55.h"
 #include "bn_sprite_items_cutscene56.h"
 #include "bn_sprite_items_cutscene57.h"
+#include "bn_sprite_items_cutscene58.h"
 
 #define IWRAM_CODE __attribute__((section(".iwram.text"), long_call))
 #define EWRAM_CODE __attribute__((section(".ewram.text"), long_call))
@@ -179,6 +182,7 @@ struct global_data
 {
     int current_level;
     int chari_offset;
+    int initialized;
 };
 global_data *global;
 
@@ -187,7 +191,7 @@ class Crate
     int steps = 0;
     bn::fixed x_speed = 0;
     bn::fixed y_speed = 0;
-	bool freed;
+    bool freed;
 
 public:
     bn::sprite_ptr sprite = bn::sprite_items::items.create_sprite(0, 0, 1);
@@ -197,7 +201,7 @@ public:
 
     Crate(int x, int y, Room *new_level, int new_type = 0)
     {
-	    freed = false;
+        freed = false;
         current_room = new_level;
         current_room->map[decode(x, y)] = 1;
         type = new_type;
@@ -218,14 +222,16 @@ public:
         }
     }
 
-	void free() {
-		freed = true;
-		sprite.set_visible(false);
-	}
+    void free()
+    {
+        freed = true;
+        sprite.set_visible(false);
+    }
 
-	bool isFree() {
-		return freed;
-	}
+    bool isFree()
+    {
+        return freed;
+    }
 
     // poosh
     void push(bn::fixed x, bn::fixed y)
@@ -241,7 +247,9 @@ public:
         }
         case 1:
         {
-            bn::sound_items::crunch.play();
+            if (state != 1) {
+                bn::sound_items::crunch.play();
+            }
             state = 1;
             sprite = bn::sprite_items::items.create_sprite(sprite.x(), sprite.y(), 3);
             sprite.put_below();
@@ -268,7 +276,8 @@ public:
         bn::fixed x_speed_prior = x_speed;
         bn::fixed y_speed_prior = y_speed;
 
-        if (freed) return;
+        if (freed)
+            return;
 
         if (x_speed != 0 || y_speed != 0)
         {
@@ -421,16 +430,17 @@ int intro()
 
 int linear_gameplay()
 {
-	// `struct` makes it a scoped enum.
-	enum class Freefall {
-		D_STOP,
-		D_LEFT,
-		D_RIGHT,
-		D_UP,
-		D_DOWN,
-	};
+    // `struct` makes it a scoped enum.
+    enum class Freefall
+    {
+        D_STOP,
+        D_LEFT,
+        D_RIGHT,
+        D_UP,
+        D_DOWN,
+    };
     // So we don't have to write `Freefall::D_LEFT`.
-	using enum Freefall;
+    using enum Freefall;
 
     // Set up world
     Room current_room;
@@ -656,7 +666,7 @@ int linear_gameplay()
         }
 
         // Handle crate movement updates.
-        for (auto &crate: sprites_b)
+        for (auto &crate : sprites_b)
         {
             // Is bullet?
             if (bullet.visible() && distance(crate.sprite, bullet) < 8 && crate.type == 2)
@@ -666,6 +676,28 @@ int linear_gameplay()
 
             // Update function, obviously
             crate.update();
+
+            // Start bit
+            if (distance(crate.sprite, player) < 24)
+            {
+                switch (crate.type)
+                {
+                case 0:
+                {
+                    notice = 1;
+                    break;
+                }
+                case 1:
+                {
+                    notice = 3;
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+                }
+            }
 
             // Delete if it leaves the world
             if (escape(crate.sprite.x().integer(), crate.sprite.y().integer()))
@@ -986,7 +1018,8 @@ int linear_gameplay()
                     {
                         for (int i = 0; i < sprites_b.size(); i++)
                         {
-	                        if (sprites_b.at(i).isFree()) continue;
+                            if (sprites_b.at(i).isFree())
+                                continue;
                             if (sprites_b.at(i).type == 1 && distance(sprites_b.at(i).sprite, bullet) < 18)
                             {
                                 sprites_b.at(i).push(0, 0);
@@ -1229,23 +1262,26 @@ int linear_gameplay()
                                                                           int y)
                             {
                                 notice = (((crate.type == 1) && (crate.state == 0))
-                                          ? 3
-                                          : 1);
+                                              ? 3
+                                              : 1);
 
+                                if (bn::keypad::a_pressed() && !gravityEnabled) {
+                                    bn::sound_items::box_03.play(0.5);
+                                }
                                 if (bn::keypad::a_held() && !gravityEnabled)
                                 {
                                     if (crate.type == 0)
                                     {
                                         freefall = direction;
-                                        bn::sound_items::box_03.play(0.5);
                                         chari_sound(global->chari_offset, 1);
                                     }
                                     crate.push(x, y);
                                 }
                             };
-                            for (auto &crate: sprites_b)
+                            for (auto &crate : sprites_b)
                             {
-                                if (crate.isFree()) continue;
+                                if (crate.isFree())
+                                    continue;
                                 if (crate.sprite.y().integer() == pros_y)
                                 {
                                     if (crate.sprite.x().integer() == pros_x - 16)
@@ -2096,7 +2132,7 @@ int show_cutscenes(int scene)
                 }
                 case 51:
                 {
-                    maxframes = 3;
+                    maxframes = 8;
                     push_tile(cutscene51);
                     break;
                 }
@@ -2140,6 +2176,12 @@ int show_cutscenes(int scene)
                 {
                     maxframes = 3;
                     push_tile(cutscene38b);
+                    break;
+                }
+                case 59:
+                {
+                    maxframes = 5;
+                    push_tile(cutscene58);
                     break;
                 }
                 default:
@@ -2630,6 +2672,12 @@ int show_cutscenes(int scene)
                     frame = 0;
                     pos++;
                 }
+                else if (strcmp(sent1, "S58") == 0)
+                {
+                    cutscene = 59;
+                    frame = 0;
+                    pos++;
+                }
                 else if (strcmp(sent1, "M_KILL") == 0)
                 {
                     music_stop();
@@ -3093,147 +3141,171 @@ int main()
     bn::core::init();
     global_data global_instance = {
         0,  // current level
-        0}; // current character
+        0,  // current character
+        0}; // init val
     global = &global_instance;
 
     intro();
     mainmenu();
-
-    music_stop();
-    // CHAPTER ONE
-    bn::music_items::bored.play(0.6);
-    show_cutscenes(2);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 6)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
     music_stop();
 
-    // CHAPTER TWO
-    bn::music_items::bored2.play(0.6);
-    show_cutscenes(3);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 12)
+    // Set up init values
+    if (global->current_level < 6)
     {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    music_stop();
-
-    // CHAPTER THREE
-    bn::music_items::bored2.play(0.6);
-    show_cutscenes(5);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 18)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    music_stop();
-
-    // Boss fight 1
-    bn::music_items::boss.play(0.6);
-    show_cutscenes(6);
-    while (global->current_level < 19)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level = 19;
-        global->current_level += linear_gameplay();
-    }
-    music_stop();
-
-    // CHAPTER FOUR
-    bn::music_items::bored2.play(0.6);
-    show_cutscenes(7);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 24)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    music_stop();
-
-    // CHAPTER FIVE
-    bn::music_items::bored2.play(0.6);
-    show_cutscenes(8);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 28)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    grid_minigame(1);
-    while (global->current_level < 31)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    grid_minigame(0);
-    music_stop();
-
-    // BOSS 2
-    bn::music_items::boss.play(0.6);
-    while (global->current_level < 32)
-    {
-        bn::sound_items::alert.play(0.5);
-        global->current_level += linear_gameplay();
-    }
-    music_stop();
-
-    // CHAPTER SIX
-    bn::music_items::bored2.play(0.5);
-    music_stop();
-    show_cutscenes(12);
-    bn::music_items::harp.play(0.5);
-    while (global->current_level < 34)
-    {
-        global->current_level += linear_gameplay();
-    }
-    grid_minigame(2);
-    while (global->current_level < 36)
-    {
-        global->current_level += linear_gameplay();
-    }
-    grid_minigame(3);
-    music_stop();
-
-    // CHAPTER SEVEN
-    bn::music_items::bored.play(0.5);
-    show_cutscenes(13);
-    bn::music_items::harp.play(0.5);
-    music_stop();
-    while (global->current_level < 38)
-    {
-        global->current_level += linear_gameplay();
-    }
-    music_stop();
-    grid_minigame(4);
-
-    bn::music_items::boss.play(0.5);
-    while (global->current_level < 39)
-    {
-        global->current_level += linear_gameplay();
-    }
-    show_cutscenes(14);
-    global->chari_offset = XYLIA;
-    while (global->current_level < 40)
-    {
-        global->current_level += linear_gameplay();
+        // CHAPTER ONE
+        bn::music_items::bored.play(0.6);
+        show_cutscenes(2);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 6)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
     }
 
-    music_stop();
-    bn::music_items::bored.play(0.5);
-    show_cutscenes(15);
+    if (global->current_level < 12)
+    {
+        // CHAPTER TWO
+        bn::music_items::bored2.play(0.6);
+        show_cutscenes(3);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 12)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+    }
+
+    if (global->current_level < 19)
+    {
+        // CHAPTER THREE
+        bn::music_items::bored2.play(0.6);
+        show_cutscenes(5);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 18)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+
+        // Boss fight 1
+        bn::music_items::boss.play(0.6);
+        show_cutscenes(6);
+        while (global->current_level < 19)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level = 19;
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+    }
+
+    if (global->current_level < 24)
+    {
+        // CHAPTER FOUR
+        bn::music_items::bored2.play(0.6);
+        show_cutscenes(7);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 24)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+    }
+
+    if (global->current_level < 32)
+    {
+        // CHAPTER FIVE
+        bn::music_items::bored2.play(0.6);
+        show_cutscenes(8);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 28)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        grid_minigame(1);
+        while (global->current_level < 31)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        grid_minigame(0);
+        music_stop();
+
+        // BOSS 2
+        bn::music_items::boss.play(0.6);
+        while (global->current_level < 32)
+        {
+            bn::sound_items::alert.play(0.5);
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+    }
+
+    if (global->current_level < 36)
+    {
+        // CHAPTER SIX
+        bn::music_items::bored2.play(0.5);
+        music_stop();
+        show_cutscenes(12);
+        bn::music_items::harp.play(0.5);
+        while (global->current_level < 34)
+        {
+            global->current_level += linear_gameplay();
+        }
+        grid_minigame(2);
+        while (global->current_level < 36)
+        {
+            global->current_level += linear_gameplay();
+        }
+        grid_minigame(3);
+        music_stop();
+    }
+
+    if (global->current_level < 40)
+    {
+        // CHAPTER SEVEN
+        bn::music_items::bored.play(0.5);
+        show_cutscenes(13);
+        bn::music_items::harp.play(0.5);
+        music_stop();
+        while (global->current_level < 38)
+        {
+            global->current_level += linear_gameplay();
+        }
+        music_stop();
+        grid_minigame(4);
+
+        bn::music_items::boss.play(0.5);
+        while (global->current_level < 39)
+        {
+            global->current_level += linear_gameplay();
+        }
+        show_cutscenes(14);
+        global->chari_offset = XYLIA;
+        while (global->current_level < 40)
+        {
+            global->current_level += linear_gameplay();
+        }
+
+        music_stop();
+        bn::music_items::bored.play(0.5);
+        show_cutscenes(15);
+    }
 
     // Credits
-    bn::music_items::anata.play(0.5);
+    global->current_level = 41;
 
-    for (int i = 0; i < 16; i++) {
+    bn::music_items::anata.play(0.5);
+    for (int i = 0; i < 16; i++)
+    {
         bn::core::update();
     }
-    
     bn::regular_bg_ptr bg_message = bn::regular_bg_items::bg_message.create_bg(0, 0);
     while (!bn::keypad::a_pressed())
     {
