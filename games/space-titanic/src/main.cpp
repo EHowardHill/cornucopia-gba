@@ -432,39 +432,6 @@ int linear_gameplay()
     // So we don't have to write `Freefall::D_LEFT`.
 	using enum Freefall;
 
-    struct CrateAction {
-	    Crate *crate;
-        int x;
-        int y;
-    };
-
-    class CrateActionQueue {
-	    // Max of four crates can ever surround the player.
-	    CrateAction actions[4];
-	    unsigned char length = 0;
-	    const unsigned char maxLength = 4;
-    public:
-        void push(Crate *crate, int x, int y)
-        {
-            CrateAction action;
-            action.crate = crate;
-            action.x = x;
-            action.y = y;
-            // If it fails, oh well.
-            if (length < maxLength) {
-                actions[length] = action;
-                length++;
-            }
-        }
-        void performAllActions() {
-            for (auto i = length - 1; i >= 0; --i) {
-	            auto crateAction = actions[i];
-	            crateAction.crate->push(crateAction.x, crateAction.y);
-            }
-            length = 0;
-        }
-    };
-
     // Set up world
     Room current_room;
     current_room.setup(global->current_level);
@@ -474,7 +441,6 @@ int linear_gameplay()
     int pros_x = current_room.start_x;
     int pros_y = current_room.start_y;
     Freefall freefall = D_STOP;
-    CrateActionQueue crateActionQueue;
     int rotate = 90;
     int dead = 0;
     int orientation = 0;
@@ -689,139 +655,22 @@ int linear_gameplay()
             entr_door.set_x(entr_door.x() + 1);
         }
 
-        // Handle crates
-        for (int i = 0; i < sprites_b.size(); i++)
+        // Handle crate movement updates.
+        for (auto &crate: sprites_b)
         {
-	        if (sprites_b.at(i).isFree()) continue;
-            if (sprites_b.at(i).sprite.y().integer() == pros_y)
-            {
-                if (sprites_b.at(i).sprite.x().integer() == pros_x - 16)
-                {
-                    switch (sprites_b.at(i).type)
-                    {
-                    case 1:
-                    {
-                        if (sprites_b.at(i).state == 0)
-                            notice = 3;
-                        break;
-                    }
-                    default:
-                    {
-                        notice = 1;
-                        break;
-                    }
-                    }
-
-                    if (bn::keypad::a_pressed() && !current_room.gravity)
-                    {
-                        if (sprites_b.at(i).type == 0)
-                        {
-                            freefall = D_RIGHT;
-                            bn::sound_items::box_03.play(0.5);
-                            chari_sound(global->chari_offset, 1);
-                        }
-                        crateActionQueue.push(&sprites_b.at(i), -2, 0);
-                    }
-                }
-                else if (sprites_b.at(i).sprite.x().integer() == pros_x + 16)
-                {
-                    switch (sprites_b.at(i).type)
-                    {
-                    case 1:
-                    {
-                        if (sprites_b.at(i).state == 0)
-                            notice = 3;
-                        break;
-                    }
-                    default:
-                    {
-                        notice = 1;
-                        break;
-                    }
-                    }
-                    if (bn::keypad::a_pressed() && !current_room.gravity)
-                    {
-                        if (sprites_b.at(i).type == 0)
-                        {
-                            freefall = D_LEFT;
-                            bn::sound_items::box_03.play(0.5);
-                            chari_sound(global->chari_offset, 1);
-                        }
-                        crateActionQueue.push(&sprites_b.at(i), 2, 0);
-                    }
-                }
-            }
-            else if (sprites_b.at(i).sprite.x().integer() == pros_x)
-            {
-                if (sprites_b.at(i).sprite.y().integer() == pros_y - 16)
-                {
-                    switch (sprites_b.at(i).type)
-                    {
-                    case 1:
-                    {
-                        if (sprites_b.at(i).state == 0)
-                            notice = 3;
-                        break;
-                    }
-                    default:
-                    {
-                        notice = 1;
-                        break;
-                    }
-                    }
-                    if (bn::keypad::a_pressed() && !current_room.gravity)
-                    {
-                        if (sprites_b.at(i).type == 0)
-                        {
-                            freefall = D_DOWN;
-                            bn::sound_items::box_03.play(0.5);
-                            chari_sound(global->chari_offset, 1);
-                        }
-                        crateActionQueue.push(&sprites_b.at(i), 0, -2);
-                    }
-                }
-                else if (sprites_b.at(i).sprite.y().integer() == pros_y + 16)
-                {
-                    switch (sprites_b.at(i).type)
-                    {
-                    case 1:
-                    {
-                        if (sprites_b.at(i).state == 0)
-                            notice = 3;
-                        break;
-                    }
-                    default:
-                    {
-                        notice = 1;
-                        break;
-                    }
-                    }
-                    if (bn::keypad::a_pressed() && !current_room.gravity)
-                    {
-                        if (sprites_b.at(i).type == 0)
-                        {
-                            freefall = D_UP;
-                            bn::sound_items::box_03.play(0.5);
-                            chari_sound(global->chari_offset, 1);
-                        }
-                        crateActionQueue.push(&sprites_b.at(i), 0, 2);
-                    }
-                }
-            }
-
             // Is bullet?
-            if (bullet.visible() && distance(sprites_b.at(i).sprite, bullet) < 8 && sprites_b.at(i).type == 2)
+            if (bullet.visible() && distance(crate.sprite, bullet) < 8 && crate.type == 2)
             {
                 bullet.set_visible(false);
             }
 
             // Update function, obviously
-            sprites_b.at(i).update();
+            crate.update();
 
             // Delete if it leaves the world
-            if (escape(sprites_b.at(i).sprite.x().integer(), sprites_b.at(i).sprite.y().integer()))
+            if (escape(crate.sprite.x().integer(), crate.sprite.y().integer()))
             {
-	            sprites_b.at(i).free();
+                crate.free();
             }
         }
 
@@ -1371,8 +1220,56 @@ int linear_gameplay()
                             }
                         }
 
-                        // Move crates.
-                        crateActionQueue.performAllActions();
+                        // Handle crate pushes.
+                        {
+                            auto handle_crate_push = [&notice, &freefall](Crate &crate,
+                                                                          bool gravityEnabled,
+                                                                          Freefall direction,
+                                                                          int x,
+                                                                          int y)
+                            {
+                                notice = (((crate.type == 1) && (crate.state == 0))
+                                          ? 3
+                                          : 1);
+
+                                if (bn::keypad::a_held() && !gravityEnabled)
+                                {
+                                    if (crate.type == 0)
+                                    {
+                                        freefall = direction;
+                                        bn::sound_items::box_03.play(0.5);
+                                        chari_sound(global->chari_offset, 1);
+                                    }
+                                    crate.push(x, y);
+                                }
+                            };
+                            for (auto &crate: sprites_b)
+                            {
+                                if (crate.isFree()) continue;
+                                if (crate.sprite.y().integer() == pros_y)
+                                {
+                                    if (crate.sprite.x().integer() == pros_x - 16)
+                                    {
+                                        handle_crate_push(crate, current_room.gravity, D_RIGHT, -2, 0);
+                                    }
+                                    else if (crate.sprite.x().integer() == pros_x + 16)
+                                    {
+                                        handle_crate_push(crate, current_room.gravity, D_LEFT, 2, 0);
+                                    }
+                                }
+                                else if (crate.sprite.x().integer() == pros_x)
+                                {
+                                    if (crate.sprite.y().integer() == pros_y - 16)
+                                    {
+                                        handle_crate_push(crate, current_room.gravity, D_DOWN, 0, -2);
+                                    }
+                                    else if (crate.sprite.y().integer() == pros_y + 16)
+                                    {
+                                        handle_crate_push(crate, current_room.gravity, D_UP, 0, 2);
+                                    }
+                                }
+                            }
+                        }
 
                         // When current_room.gravity is activated
                         if (current_room.gravity)
