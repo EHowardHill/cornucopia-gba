@@ -1275,7 +1275,9 @@ int linear_gameplay()
                                         freefall = direction;
                                         chari_sound(global->chari_offset, 1);
                                     }
-                                    crate.push(x, y);
+                                    if (crate.state == 0) {
+	                                    crate.push(x, y);
+                                    }
                                 }
                             };
                             for (auto &crate : sprites_b)
